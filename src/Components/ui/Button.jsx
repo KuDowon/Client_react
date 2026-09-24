@@ -1,6 +1,6 @@
-import React from "react";
+import React, { forwardRef } from "react";
 
-export default function Button({
+const Button = forwardRef(function Button({
   variant = "primary",
   size = "md",
   block = false,
@@ -10,7 +10,7 @@ export default function Button({
   disabled,
   type = "button",
   ...props
-}) {
+}, ref) {
   const classes = [
     "ui-button",
     `ui-button--${variant}`,
@@ -21,6 +21,7 @@ export default function Button({
 
   return (
     <button
+      ref={ref}
       type={type}
       className={classes}
       disabled={disabled || loading}
@@ -30,4 +31,6 @@ export default function Button({
       {loading ? "처리 중…" : children}
     </button>
   );
-}
+});
+
+export default Button;
