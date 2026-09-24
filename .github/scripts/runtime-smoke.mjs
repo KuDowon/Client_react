@@ -43,6 +43,73 @@ const cases = [
     expectedText: "문중문고 이용안내",
     navigation: "mobile",
   },
+  {
+    name: "search-empty-mobile",
+    path: "/search",
+    viewport: { width: 390, height: 844 },
+    expectedText: "검색어를 입력해주세요.",
+    navigation: "mobile",
+  },
+  {
+    name: "book-invalid-mobile",
+    path: "/BookPage/not-a-book",
+    viewport: { width: 390, height: 844 },
+    expectedText: "잘못된 도서 링크예요.",
+    navigation: "mobile",
+  },
+  {
+    name: "borrow-empty-mobile",
+    path: "/CurrentBorrow",
+    viewport: { width: 390, height: 844 },
+    expectedText: "대출 중인 도서가 없어요.",
+    navigation: "mobile",
+  },
+  {
+    name: "reserve-empty-mobile",
+    path: "/CurrentReserve",
+    viewport: { width: 390, height: 844 },
+    expectedText: "현재 예약 중인 도서가 없어요.",
+    navigation: "mobile",
+  },
+  {
+    name: "overdue-empty-mobile",
+    path: "/CurrentOverdue",
+    viewport: { width: 390, height: 844 },
+    expectedText: "연체 중인 도서가 없어요.",
+    navigation: "mobile",
+  },
+  {
+    name: "signup-mobile",
+    path: "/SignUp",
+    viewport: { width: 390, height: 844 },
+    expectedText: "문중문고 이용을 위한 기본 정보를 입력해주세요.",
+  },
+  {
+    name: "find-id-mobile",
+    path: "/FindId",
+    viewport: { width: 390, height: 844 },
+    expectedText: "가입할 때 입력한 이름과 전화번호를 확인해주세요.",
+  },
+  {
+    name: "reset-password-mobile",
+    path: "/ResetPassword",
+    viewport: { width: 390, height: 844 },
+    expectedText: "현재 비밀번호 변경 기능은 관리자 확인을 통해 진행돼요.",
+  },
+  {
+    name: "notice-mobile",
+    path: "/NoticePage",
+    viewport: { width: 390, height: 844 },
+    expectedText: "문중문고 운영과 이용에 필요한 소식을 확인하세요.",
+    navigation: "mobile",
+  },
+  {
+    name: "curation-mobile",
+    path: "/CurationPage",
+    viewport: { width: 390, height: 844 },
+    expectedText: "수업과 관심사에 맞는 도서를 둘러보세요.",
+    navigation: "mobile",
+  },
 ];
 
 await mkdir("smoke-artifacts", { recursive: true });
