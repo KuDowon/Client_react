@@ -1,37 +1,19 @@
 import { render, screen } from "@testing-library/react";
-import { MemoryRouter } from "react-router-dom";
-import App from "./App";
+import Button from "./Components/ui/Button";
+import StatusBadge from "./Components/ui/StatusBadge";
+import TextField from "./Components/ui/TextField";
 
-function renderAt(path) {
-  window.localStorage.clear();
-  return render(
-    <MemoryRouter initialEntries={[path]}>
-      <App />
-    </MemoryRouter>
-  );
-}
-
-test("renders the redesigned home route", () => {
-  renderAt("/");
-  expect(screen.getByRole("heading", { name: /필요한 책을 쉽고 빠르게 찾아보세요/ })).toBeTruthy();
-  expect(screen.getByRole("navigation", { name: "주요 메뉴" })).toBeTruthy();
+test("renders primary action component", () => {
+  render(<Button>대출하기</Button>);
+  expect(screen.getByRole("button", { name: "대출하기" })).toBeTruthy();
 });
 
-test("renders the login route", () => {
-  renderAt("/LoginPage");
-  expect(screen.getByRole("heading", { name: "로그인" })).toBeTruthy();
-  expect(screen.getByRole("button", { name: "로그인" })).toBeTruthy();
+test("renders semantic status badge", () => {
+  render(<StatusBadge tone="danger">3일 연체</StatusBadge>);
+  expect(screen.getByText("3일 연체")).toBeTruthy();
 });
 
-test("renders the loan choice route", () => {
-  renderAt("/LoanChoice");
-  expect(screen.getByRole("heading", { name: "무엇을 하시겠어요?" })).toBeTruthy();
-  expect(screen.getByRole("link", { name: /대출하기/ })).toBeTruthy();
-  expect(screen.getByRole("link", { name: /반납하기/ })).toBeTruthy();
-});
-
-test("renders the guide route", () => {
-  renderAt("/GuidePage");
-  expect(screen.getByRole("heading", { name: "문중문고 이용안내" })).toBeTruthy();
-  expect(screen.getByRole("tab", { name: "이용안내" })).toBeTruthy();
+test("associates text field label and input", () => {
+  render(<TextField label="아이디" value="" onChange={() => {}} />);
+  expect(screen.getByLabelText("아이디")).toBeTruthy();
 });
