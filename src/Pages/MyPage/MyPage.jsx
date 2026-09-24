@@ -1,166 +1,120 @@
-import React, { useState, useEffect } from 'react';
-import { getMyPage } from '../../Api/user';
-import { Link, useNavigate } from 'react-router-dom';
+import React,{useEffect,useState} from "react";
+import {useNavigate} from "react-router-dom";
+import {getMyPage} from "../../Api/user";
+import "../../Css/MyPage.css";
 
-import '../../Css/MyPage.css'; 
-import logoImage from '../../Images/navigation2.png';
+import Footer from "../../Components/Footer";
+import AppHeader from "../../Components/layout/AppHeader";
+import AppShell from "../../Components/layout/AppShell";
+import PageContainer from "../../Components/layout/PageContainer";
+import LibraryStatusSummary from "../../Components/library/LibraryStatusSummary";
+import Button from "../../Components/ui/Button";
+import EmptyState from "../../Components/ui/EmptyState";
+import Icon from "../../Components/ui/Icon";
+import IconButton from "../../Components/ui/IconButton";
+import SectionHeader from "../../Components/ui/SectionHeader";
+import Skeleton from "../../Components/ui/Skeleton";
 
-function MyPage() {
-  // 1. 상태(State) 관리
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [borrowCount, setBorrowCount] = useState('-');
-  const [overdueCount, setOverdueCount] = useState('-');
-  const [reserveCount, setReserveCount] = useState('-');
-  
-  // 2. 페이지 이동을 위한 useNavigate 훅
-  const navigate = useNavigate();
-  useEffect(() => {
-    let abort = false;
-    (async () => {
+export default function MyPage(){
+  const [user,setUser]=useState(null);
+  const [loading,setLoading]=useState(true);
+  const [error,setError]=useState("");
+  const [borrowCount,setBorrowCount]=useState(null);
+  const [overdueCount,setOverdueCount]=useState(null);
+  const [reserveCount,setReserveCount]=useState(null);
+  const navigate=useNavigate();
+
+  useEffect(()=>{
+    let abort=false;
+    (async()=>{
       try{
-        const me = await getMyPage();
-        if(!abort) setUser(me);
-      }catch(e){
-        if(!abort) {
-           console.error("마이페이지 정보 로드 중 오류 발생:", e);
-           if (e.response && e.response.status !== 401 && !abort) {
-                     setError('정보를 불러오지 못했습니다.');
-           }
+        const me=await getMyPage();
+        if(!abort)setUser(me);
+      }catch(error){
+        if(!abort){
+          console.error("마이페이지 정보 로드 중 오류 발생:",error);
+          if(error.message!=="Unauthorized")setError("정보를 불러오지 못했습니다.");
         }
       }finally{
-        if(!abort) setLoading(false);
+        if(!abort)setLoading(false);
       }
     })();
-    return () => { abort = true; };
-  }, []);
+    return()=>{abort=true;};
+  },[]);
 
-  useEffect(() => {
-        // localStorage에서 값을 읽어와 숫자로 변환합니다. 없으면 '-'로 유지됩니다.
-        const storedBorrow = localStorage.getItem('borrowCount');
-        const storedOverdue = localStorage.getItem('overdueCount');
-        const storedReserve = localStorage.getItem('reserveCount');
+  useEffect(()=>{
+    const borrow=localStorage.getItem("borrowCount");
+    const overdue=localStorage.getItem("overdueCount");
+    const reserve=localStorage.getItem("reserveCount");
+    setBorrowCount(borrow!==null?Number(borrow):null);
+    setOverdueCount(overdue!==null?Number(overdue):null);
+    setReserveCount(reserve!==null?Number(reserve):null);
+  },[]);
 
-        setBorrowCount(storedBorrow ? parseInt(storedBorrow, 10) : '-');
-        setOverdueCount(storedOverdue ? parseInt(storedOverdue, 10) : '-');
-        setReserveCount(storedReserve ? parseInt(storedReserve, 10) : '-');
-    }, []);
-
-   if (loading) return <div className="container">불러오는 중…</div>;
-    // 일반적인 API 오류가 발생했고, 로그인 유무와 관계없이 페이지 표시 불가일 경우
-    if (error) return <div className="container" role="alert">{error}</div>;
-
-    // ** 로그인 되지 않은 상태일 경우 **
-    if (!user) {
-        return (
-            <div>
-                <div className="top-bar">
-                    <Link to="/" className="back-btn" aria-label="뒤로가기">←</Link>
-                    <span className="top-tittle">마이페이지</span>
-                </div>
-                <Link to="/"><img src={logoImage} alt="로고" className="logo" /></Link>
-
-                <div className="container" style={{ padding: '20px', textAlign: 'center' }}>
-                    <p style={{ fontSize: '1.2em', fontWeight: 'bold', marginBottom: '15px' }}>
-                        로그인이 필요한 서비스입니다.
-                    </p>
-                    <p style={{ marginBottom: '15px', color: '#666' }}>
-                        내 정보 확인 및 대출/예약 서비스를 이용하려면 로그인 해주세요.
-                    </p>
-                    <button 
-                        onClick={() => navigate('/LoginPage')} 
-                        style={{ 
-                            padding: '10px 20px', 
-                            backgroundColor: '#0095ff', 
-                            color: 'white', 
-                            border: 'none', 
-                            borderRadius: '5px', 
-                            cursor: 'pointer' 
-                        }}
-                    >
-                        로그인 하러 가기
-                    </button>
-                </div>
-            </div>
-        );
-    }
-    
-    // ** 로그인 된 상태일 경우 **
   return (
-    <div>
-      <div className="top-bar">
-        <Link to="/" className="back-btn" aria-label="뒤로가기">←</Link>
-        <span className="top-tittle">마이페이지</span>
-      </div>
+    <AppShell>
+      <AppHeader title="마이" backTo="/"/>
+      <PageContainer>
+        <section className="mypage-v2">
+          {loading?(
+            <div className="mypage-v2__loading">
+              <Skeleton width={180} height={30}/>
+              <Skeleton width="100%" height={120} radius={12}/>
+              <Skeleton width="100%" height={160} radius={12}/>
+            </div>
+          ):error?(
+            <EmptyState icon="alert" title="내 정보를 불러오지 못했어요." description={error}/>
+          ):!user?(
+            <EmptyState
+              icon="user"
+              title="로그인이 필요한 서비스예요."
+              description="내 정보와 대출·예약 현황을 확인하려면 로그인해주세요."
+              action={<Button onClick={()=>navigate("/LoginPage")}>로그인하기</Button>}
+            />
+          ):(
+            <>
+              <section className="mypage-v2__profile">
+                <div className="mypage-v2__profile-top">
+                  <div>
+                    <p className="mypage-v2__eyebrow">내 정보</p>
+                    <h1>{user.name}</h1>
+                  </div>
+                  <IconButton icon="settings" label="회원정보 수정" variant="outline" onClick={()=>navigate("/EditProfilePage")}/>
+                </div>
+                <dl className="mypage-v2__profile-meta">
+                  <div><dt>아이디</dt><dd>{user.username||"-"}</dd></div>
+                  <div><dt>회원 구분</dt><dd>{user.userType||"-"}</dd></div>
+                  <div><dt>전화번호</dt><dd>{user.phone||"-"}</dd></div>
+                </dl>
+              </section>
 
-      <div className="user-info">
-        <div className="name-row">
-          <div style={{ fontSize: '19px', fontWeight: 'bold' }}>
-            {user?.name} <span style={{ fontSize: '14px', fontWeight: 'normal' }}>{user?.type}</span>
-          </div>
-          <div className="settings-btn" onClick={() => navigate('/EditProfilePage')}>⚙️</div>
-        </div>
-        <div>아이디: {user?.username}</div>
-        <div>전화번호: {user?.phone}</div>
-      </div>
-      
-      <div className="nav-block">
-        {/*
-        <div className="nav-link" onClick={() => navigate('/Interest')}>
-          관심 도서 <span>›</span>
-        </div>
-        */}
-        <a
-            href="https://forms.gle/bM5gdDtrqMD6v3kj9" 
-            className="nav-link"
-            target="_blank" 
-            rel="noopener noreferrer"
-        >
-          희망도서신청 <span>›</span>
-        </a>
-        <div className="nav-link" onClick={() => navigate('/MyReviewsPage')}>
-          내가 쓴 리뷰 <span>›</span>
-        </div>
-         <a
-            href="http://pf.kakao.com/_pHxbDn"  
-            className="nav-link"
-            target="_blank" 
-            rel="noopener noreferrer"
-        >
-          오류 문의 (관리자) <span>›</span>
-        </a>
-        <div className="nav-link" onClick={() => navigate('/CurrentBorrow')}>
-          <span style={{ display: 'inline-flex', alignItems: 'center' }}>
-            대출도서
-            <span className="count-badge" style={{ marginLeft: 0 }}>
-              {borrowCount}
-            </span>
-          </span>
-          <span>›</span>
-        </div>
-        <div className="nav-link" onClick={() => navigate('/CurrentReserve')}>
-          <span style={{ display: 'inline-flex', alignItems: 'center' }}>
-            예약도서
-            <span className="count-badge" style={{ marginLeft: 0 }}>
-              {reserveCount}
-            </span>
-          </span>
-          <span>›</span>
-        </div>
-        <div className="nav-link" onClick={() => navigate('/CurrentOverrdue')}>
-          <span style={{ display: 'inline-flex', alignItems: 'center' }}>
-            연체도서
-            <span className="count-badge" style={{ marginLeft: 0 }}>
-              {overdueCount}
-            </span>
-          </span>
-          <span>›</span>
-        </div>
-      </div>
-      <hr />
-    </div>
+              <section className="mypage-v2__section">
+                <SectionHeader title="이용 현황"/>
+                <LibraryStatusSummary borrowCount={borrowCount} reserveCount={reserveCount} overdueCount={overdueCount}/>
+              </section>
+
+              <section className="mypage-v2__section">
+                <SectionHeader title="내 활동"/>
+                <div className="mypage-v2__menu">
+                  <button type="button" onClick={()=>navigate("/MyReviewsPage")}><span><Icon name="edit"/>내가 쓴 리뷰</span><Icon name="chevron-right"/></button>
+                  <a href="https://forms.gle/bM5gdDtrqMD6v3kj9" target="_blank" rel="noopener noreferrer"><span><Icon name="book"/>희망도서 신청</span><Icon name="chevron-right"/></a>
+                  <a href="http://pf.kakao.com/_pHxbDn" target="_blank" rel="noopener noreferrer"><span><Icon name="info"/>오류 문의</span><Icon name="chevron-right"/></a>
+                </div>
+              </section>
+
+              <section className="mypage-v2__section">
+                <SectionHeader title="도서 이용"/>
+                <div className="mypage-v2__menu">
+                  <button type="button" onClick={()=>navigate("/CurrentBorrow")}><span><Icon name="book"/>대출 도서</span><Icon name="chevron-right"/></button>
+                  <button type="button" onClick={()=>navigate("/CurrentReserve")}><span><Icon name="clock"/>예약 도서</span><Icon name="chevron-right"/></button>
+                  <button type="button" onClick={()=>navigate("/CurrentOverrdue")}><span><Icon name="alert"/>연체 도서</span><Icon name="chevron-right"/></button>
+                </div>
+              </section>
+            </>
+          )}
+        </section>
+      </PageContainer>
+      <Footer/>
+    </AppShell>
   );
 }
-
-export default MyPage;
