@@ -54,9 +54,9 @@
 .ui-toast--info{border-color:var(--color-info-border)}
 .ui-section-header{min-height:30px;display:flex;align-items:center;justify-content:space-between;gap:var(--space-4)}
 .ui-section-header__title{font-size:20px;line-height:30px;font-weight:700;letter-spacing:-.01em}
-.app-header{height:56px;width:100%;display:grid;grid-template-columns:44px minmax(0,1fr) 44px;align-items:center;border-bottom:1px solid var(--color-border-subtle);background:var(--color-surface-default)}
-.app-header--main{grid-template-columns:minmax(0,1fr) auto}
-.app-header__inner{width:100%;max-width:1440px;margin:0 auto;padding:0 var(--layout-gutter);display:contents}
+.app-header{width:100%;border-bottom:1px solid var(--color-border-subtle);background:var(--color-surface-default)}
+.app-header__inner{width:100%;max-width:1440px;height:56px;margin:0 auto;padding:0 var(--layout-gutter);display:grid;grid-template-columns:44px minmax(0,1fr) 44px;align-items:center}
+.app-header--main .app-header__inner{grid-template-columns:minmax(0,1fr) auto}
 .app-header__title{font-size:18px;line-height:27px;font-weight:700;letter-spacing:-.005em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .app-header--main .app-header__title{padding-left:0}
 .app-header__right{display:flex;align-items:center;justify-content:flex-end;min-width:44px}
@@ -65,3 +65,21 @@
 .app-bottom-nav__item[aria-current="page"]{color:var(--color-navigation-active)}
 .app-bottom-nav__item[aria-current="page"]::before{content:"";position:absolute;top:0;left:50%;width:24px;height:2px;border-radius:0 0 2px 2px;background:var(--color-navigation-active);transform:translateX(-50%)}
 @media (min-width:600px){.app-bottom-nav{display:none}}
+
+.ui-checkbox{min-height:44px;width:100%;display:flex;align-items:center;gap:8px;cursor:pointer}
+.ui-checkbox__input{position:absolute;opacity:0;pointer-events:none}
+.ui-checkbox__box{width:20px;height:20px;flex:0 0 20px;border:1px solid var(--color-border-control);border-radius:4px;background:var(--color-surface-default);display:grid;place-items:center}
+.ui-checkbox__box::after{content:"";width:9px;height:5px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg) translateY(-1px);opacity:0}
+.ui-checkbox__input:checked+.ui-checkbox__box{background:var(--color-action-primary-bg);border-color:var(--color-action-primary-bg)}
+.ui-checkbox__input:checked+.ui-checkbox__box::after{opacity:1}
+.ui-checkbox__input:focus-visible+.ui-checkbox__box{outline:3px solid color-mix(in srgb,var(--color-blue-600) 18%,transparent);outline-offset:2px}
+.ui-checkbox__label{font-size:16px;line-height:24px;color:var(--color-text-primary)}
+.ui-empty{width:100%;min-height:220px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:32px 20px;text-align:center}
+.ui-empty__icon{width:48px;height:48px;border-radius:50%;background:var(--color-gray-50);color:var(--color-text-secondary);display:grid;place-items:center}
+.ui-empty__copy{display:flex;flex-direction:column;gap:8px;max-width:420px}
+.ui-empty__title{font-size:18px;line-height:27px;font-weight:600}
+.ui-empty__description{font-size:14px;line-height:21px;color:var(--color-text-secondary)}
+.ui-empty__action{margin-top:4px}
+.ui-skeleton{display:block;background:linear-gradient(90deg,var(--color-gray-100),var(--color-gray-50),var(--color-gray-100));background-size:200% 100%;animation:ui-skeleton-wave 1.4s ease-in-out infinite}
+@keyframes ui-skeleton-wave{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@media (prefers-reduced-motion:reduce){.ui-skeleton{animation:none;background:var(--color-gray-100)}}
