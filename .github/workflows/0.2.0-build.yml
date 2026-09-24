@@ -9,7 +9,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 12
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -26,3 +26,8 @@ jobs:
         env:
           DISABLE_ESLINT_PLUGIN: "true"
         run: npm run build
+
+      - name: Smoke tests
+        env:
+          CI: "true"
+        run: npm test -- --watchAll=false
