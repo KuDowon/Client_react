@@ -101,5 +101,3 @@
 
 .search-bar-v2{width:100%;max-width:800px;display:flex;flex-direction:column;gap:8px}
 .search-bar-v2__error{font-size:12px;line-height:18px;color:var(--color-danger)}
-
-.app-header--main .app-header__inner{grid-template-columns:minmax(0,1fr) auto}.app-header__desktop-nav{display:none}}
