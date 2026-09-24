@@ -114,9 +114,20 @@ const mockMyPage = {
 };
 
 function jsonResponse(request, body) {
+  const headers = {
+    "Access-Control-Allow-Origin": "http://127.0.0.1:4173",
+    "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, Accept",
+  };
+
+  if (request.method() === "OPTIONS") {
+    return request.respond({ status: 204, headers });
+  }
+
   return request.respond({
     status: 200,
     contentType: "application/json",
+    headers,
     body: JSON.stringify(body),
   });
 }
@@ -176,8 +187,8 @@ try {
 
     await page.setViewport(testCase.viewport);
 
-    if (testCase.entryFrom || testCase.mockMyPage) {
-      await page.evaluateOnNewDocument((entryFrom, seedMyPage) => {
+    await page.evaluateOnNewDocument((entryFrom, seedMyPage) => {
+        window.localStorage.clear();
         if (entryFrom) {
           window.history.replaceState({ usr: { from: entryFrom }, key: "qa-entry", idx: 0 }, "", window.location.href);
         }
@@ -189,7 +200,6 @@ try {
           window.localStorage.setItem("overdueCount", "1");
         }
       }, testCase.entryFrom || null, Boolean(testCase.mockMyPage));
-    }
 
     const response = await page.goto(`http://127.0.0.1:4173${testCase.path}`, {
       waitUntil: "domcontentloaded",
