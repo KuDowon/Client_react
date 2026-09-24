@@ -1,0 +1,8 @@
+.status-page{padding:32px 0 48px;display:flex;flex-direction:column;gap:16px}
+.status-page__intro{display:flex;flex-direction:column;gap:4px}
+.status-page__description{font-size:14px;line-height:21px;color:var(--color-text-secondary)}
+.status-page__list{display:flex;flex-direction:column}
+.status-page__loading{display:flex;flex-direction:column}
+.status-page__loading-row{display:grid;grid-template-columns:72px minmax(0,1fr);gap:12px;padding:16px 0;border-bottom:1px solid var(--color-border-subtle)}
+.status-page__loading-copy{display:flex;flex-direction:column;gap:8px}
+@media (min-width:768px){.status-page{padding-top:40px;max-width:920px}}
