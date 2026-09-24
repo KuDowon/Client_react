@@ -1,253 +1,218 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import '../Css/MainPage.css';
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import "../Css/MainPage.css";
 
-import Footer from '../Components/Footer';
-import SearchBar from '../Components/SearchBar';
-import PostList from '../Components/PostList';
+import Footer from "../Components/Footer";
+import SearchBar from "../Components/SearchBar";
+import AppShell from "../Components/layout/AppShell";
+import AppHeader from "../Components/layout/AppHeader";
+import PageContainer from "../Components/layout/PageContainer";
+import LibraryStatusSummary from "../Components/library/LibraryStatusSummary";
+import Button from "../Components/ui/Button";
+import Icon from "../Components/ui/Icon";
+import SectionHeader from "../Components/ui/SectionHeader";
 
-import noticebanner from '../Images/banner.png';
+import noticebanner from "../Images/banner.png";
 
-const BASE_URL = 'https://mungo.n-e.kr';
+const BASE_URL = "https://mungo.n-e.kr";
 
-const getAuthHeaders = (token) => {
-    return {
-        'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {}), 
-    };
-};
+const getAuthHeaders = (token) => ({
+  "Content-Type": "application/json",
+  ...(token ? { Authorization: `Bearer ${token}` } : {}),
+});
 
 const fetchApi = async (path, token) => {
-    try {
-        const response = await fetch(`${BASE_URL}${path}`, {
-            headers: getAuthHeaders(token),
-        });
-
-        if (response.ok) {
-            return await response.json();
-        }
-        return null; 
-    } catch (error) {
-        console.error(`[API 통신 오류] ${path}:`, error);
-        return null;
-    }
+  try {
+    const response = await fetch(`${BASE_URL}${path}`, {
+      headers: getAuthHeaders(token),
+    });
+    if (response.ok) return await response.json();
+    return null;
+  } catch (error) {
+    console.error(`[API 통신 오류] ${path}:`, error);
+    return null;
+  }
 };
 
 const fetchUserCounts = async (token, setBorrow, setOverdue, setReserve) => {
-    if (!token) return;
+  if (!token) return;
 
-    try {
-        // 1. 대출 및 연체 목록 가져오기
-        const rentals = await fetchApi('/rentals/current/', token);
-        let nonOverdueCount = 0;
-        let overdueCount = 0;
-        
-        if (rentals && Array.isArray(rentals)) {
-            nonOverdueCount = rentals.filter(item => !item.is_overdue).length;
-            overdueCount = rentals.filter(item => item.is_overdue).length;
-        }
-        setBorrow(nonOverdueCount);
-        setOverdue(overdueCount);
-        localStorage.setItem('borrowCount', nonOverdueCount.toString());
-        localStorage.setItem('overdueCount', overdueCount.toString());
+  try {
+    const rentals = await fetchApi("/rentals/current/", token);
+    let nonOverdueCount = 0;
+    let overdueCount = 0;
 
-        // 2. 예약 목록 가져오기
-        const reservations = await fetchApi('/reservations/', token);
-        let activeReserveCount = 0;
-
-        if (reservations && Array.isArray(reservations)) {
-            // 'ACTIVE' 상태의 예약만 카운트
-            activeReserveCount = reservations.filter(item => item.status === 'ACTIVE').length;
-        }
-        setReserve(activeReserveCount);
-        localStorage.setItem('reserveCount', activeReserveCount.toString());
-
-        console.log('✅ 메인 페이지 뱃지 정보가 갱신되었습니다.');
-
-    } catch (e) {
-        console.error('메인 페이지 카운트 정보 갱신 실패:', e);
-        // API 오류 시 사용자에게 혼란을 주지 않기 위해 0으로 표시
-        setBorrow(0);
-        setOverdue(0);
-        setReserve(0);
-        localStorage.setItem('borrowCount', '0');
-        localStorage.setItem('overdueCount', '0');
-        localStorage.setItem('reserveCount', '0');
+    if (rentals && Array.isArray(rentals)) {
+      nonOverdueCount = rentals.filter((item) => !item.is_overdue).length;
+      overdueCount = rentals.filter((item) => item.is_overdue).length;
     }
+
+    setBorrow(nonOverdueCount);
+    setOverdue(overdueCount);
+    localStorage.setItem("borrowCount", nonOverdueCount.toString());
+    localStorage.setItem("overdueCount", overdueCount.toString());
+
+    const reservations = await fetchApi("/reservations/", token);
+    let activeReserveCount = 0;
+
+    if (reservations && Array.isArray(reservations)) {
+      activeReserveCount = reservations.filter((item) => item.status === "ACTIVE").length;
+    }
+
+    setReserve(activeReserveCount);
+    localStorage.setItem("reserveCount", activeReserveCount.toString());
+  } catch (error) {
+    console.error("메인 페이지 카운트 정보 갱신 실패:", error);
+    setBorrow(0);
+    setOverdue(0);
+    setReserve(0);
+    localStorage.setItem("borrowCount", "0");
+    localStorage.setItem("overdueCount", "0");
+    localStorage.setItem("reserveCount", "0");
+  }
 };
 
 function getLoggedInUser() {
-    // 로컬 스토리지에서 토큰과 사용자 이름을 가져옵니다.
-    const accessToken = localStorage.getItem('accessToken');
-    const userID = localStorage.getItem('userID');
-
-    // 토큰과 사용자 이름이 모두 존재하면 로그인 상태로 간주
-    if (accessToken && userID) {
-        return { userID, accessToken }; // accessToken도 반환하여 API 호출에 사용
-    }
-    return null; // 로그인 상태가 아님
+  const accessToken = localStorage.getItem("accessToken");
+  const userID = localStorage.getItem("userID");
+  return accessToken && userID ? { userID, accessToken } : null;
 }
-
 
 function MainPage() {
   const navigate = useNavigate();
-  const [user, setUser] = useState(getLoggedInUser()); 
-
-  // 각 뱃지 숫자를 관리할 상태
+  const [user, setUser] = useState(getLoggedInUser());
   const [borrowCount, setBorrowCount] = useState(null);
   const [overdueCount, setOverdueCount] = useState(null);
   const [reserveCount, setReserveCount] = useState(null);
 
-  // 컴포넌트가 처음 렌더링될 때 데이터 호출
   useEffect(() => {
-        // user 객체에 토큰이 있을 때만 API 호출을 시도
-        if (user && user.accessToken) {
-            // 로그인 상태: API 호출하여 최신 정보 갱신
-            fetchUserCounts(
-                user.accessToken, 
-                setBorrowCount, 
-                setOverdueCount, 
-                setReserveCount
-            );
-        } else {
-            // 로그아웃 상태: 뱃지 카운트를 null로 설정하여 UI에 '...' 표시
-            setBorrowCount(null);
-            setOverdueCount(null);
-            setReserveCount(null);
-        }
-
-    // user 상태가 변경될 때마다 실행 (로그인/로그아웃 시)
-    // 컴포넌트 마운트 시에도 user 상태를 확인하여 실행
-    }, [user]); 
+    if (user?.accessToken) {
+      fetchUserCounts(
+        user.accessToken,
+        setBorrowCount,
+        setOverdueCount,
+        setReserveCount
+      );
+    } else {
+      setBorrowCount(null);
+      setOverdueCount(null);
+      setReserveCount(null);
+    }
+  }, [user]);
 
   const handleAuthClick = () => {
-      if (user) {
-        // 로그아웃 로직: 로컬 스토리지에서 모든 인증 정보 제거
-        console.log(`${user.userID} 님 로그아웃`);
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('userID');
-        localStorage.removeItem('username');
-        localStorage.removeItem('borrowCount');
-        localStorage.removeItem('reserveCount');
-        localStorage.removeItem('overdueCount');
+    if (!user) {
+      navigate("/LoginPage");
+      return;
+    }
 
-        setUser(null); // 상태 업데이트
-        setBorrowCount(null); // 뱃지 초기화
-        setOverdueCount(null);
-        setReserveCount(null);
-        navigate('/'); // 로그아웃 후 메인 페이지로 이동 (상태 변화로 리렌더링)
-      } else {
-        // 로그인/회원가입 페이지로 이동
-        navigate('/LoginPage');
-      }
-    };
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("userID");
+    localStorage.removeItem("username");
+    localStorage.removeItem("borrowCount");
+    localStorage.removeItem("reserveCount");
+    localStorage.removeItem("overdueCount");
 
-  // 공지, 큐레이션, 소개, 이용안내에 들어갈 더미 데이터 (임시로 생성)
-  /*
-  const noticePosts = [
-    { title: '문중문고 개관', date: '25-10-14' },
-  ];*/
-  const curationPosts = [
-    { title: '25-10-31 업데이트 예정입니다.', date: '25-10-14' }
-  ];
-  const guidePosts = [
-    { title: '문중문고 이용안내', date: '25-10-14' },
-  ];
-
-  const authLinkTo = user ? "/" : "/LoginPage"; 
-  const authButtonText = user ? `${user.userID} 님 / 로그아웃` : "로그인 / 회원가입";
+    setUser(null);
+    setBorrowCount(null);
+    setOverdueCount(null);
+    setReserveCount(null);
+    navigate("/");
+  };
 
   return (
-    <div className="main-container">
-      <header className="header">
-        <Link className="title" to="/">문중문고</Link>
-        <Link 
-          className="login-btn" 
-          to={authLinkTo}
-          onClick={user ? handleAuthClick : null} 
-        >
-          {authButtonText}
-        </Link>
-      </header>
+    <AppShell>
+      <AppHeader
+        main
+        title="문중문고"
+        right={
+          <Button variant="tertiary" size="sm" onClick={handleAuthClick}>
+            {user ? "로그아웃" : "로그인"}
+          </Button>
+        }
+      />
 
-      <SearchBar />
+      <PageContainer>
+        <div className="main-v2 layout-stack">
+          <section className="main-v2__hero" aria-labelledby="main-hero-title">
+            <div className="main-v2__hero-copy">
+              <p className="main-v2__eyebrow">문중문고</p>
+              <h1 id="main-hero-title" className="main-v2__headline">
+                {user
+                  ? `${user.userID}님, 어떤 책을 찾고 계신가요?`
+                  : "필요한 책을 쉽고 빠르게 찾아보세요."}
+              </h1>
+              <p className="main-v2__description">
+                도서 검색부터 대출·예약 현황까지 한곳에서 확인할 수 있어요.
+              </p>
+            </div>
+            <SearchBar />
+          </section>
 
-      {/* 상태 버튼 */}
-      <div className="status-buttons">
-        <Link to="/CurrentBorrow" className="notification">
-          <span>대출 중 📖</span>
-            <span className="badge">
-            {borrowCount === null ? '...' : borrowCount}
-          </span>
-          <span className="line">━━</span>
-          <span className="unit">권</span>
-        </Link>
-        <Link to="/CurrentReserve" className="notification">
-          <span>예약 중 ⏰</span>
-          <span className="badge">
-            {reserveCount === null ? '...' : reserveCount}
-          </span>
-          <span className="line">━━</span>
-          <span className="unit">권</span>
-        </Link>
-        <Link to="/CurrentOverdue" className="notification">
-          <span>연체 중 ⚠️</span>
-          <span className="badge">
-            {overdueCount === null ? '...' : overdueCount}
-          </span>
-          <span className="line">━━</span>
-          <span className="unit">권</span>
-        </Link>
-      </div>
-
-      <div className="section-wrapper">
-        <div className="section-header">
-          <span>📢 공지</span>
-          <div className="plus-button" to="/NoticePage">＋</div>
-        </div>
-        <div className="banner-card">
-          <Link to="/NoticePage">
-            <img src={noticebanner} alt="공지사항 배너이미지" className="banner-image" />
-          </Link>
-        </div>
-      </div>
-      
-      <div className="bottom-sections">
-        <div className="note">
-          <Link to="/CurationPage" style={{ textDecoration: 'none', color: 'inherit' }}>
-              <PostList 
-                  title="큐레이션" 
-                  icon="👩‍🏫" 
-                  linkTo="/CurationPage"
-                  posts={curationPosts} 
-              />
-          </Link>
-    </div>
-
-        <div className="right-column">
-          {/*
-          <PostList 
-            title="문중문고 소개" 
-            icon="📚" 
-            linkTo="/GuidePage" 
-            posts={introPosts} 
-          />
-          */}
-          <Link to="/CurationPage" style={{ textDecoration: 'none', color: 'inherit' }}>
-            <PostList 
-              title="이용안내" 
-              icon="ℹ️" 
-              linkTo="/GuidePage" 
-              posts={guidePosts} 
+          <section className="main-v2__section" aria-labelledby="library-status-title">
+            <SectionHeader
+              title="나의 이용 현황"
+              action={
+                !user ? (
+                  <button className="main-v2__text-action" type="button" onClick={() => navigate("/LoginPage")}>
+                    로그인하기 <Icon name="chevron-right" size={16} />
+                  </button>
+                ) : null
+              }
             />
-          </Link>
+            <div id="library-status-title" className="sr-only">나의 이용 현황</div>
+            <LibraryStatusSummary
+              borrowCount={user ? borrowCount : 0}
+              reserveCount={user ? reserveCount : 0}
+              overdueCount={user ? overdueCount : 0}
+            />
+            {!user ? (
+              <p className="main-v2__helper">
+                로그인하면 현재 대출·예약·연체 현황을 바로 확인할 수 있어요.
+              </p>
+            ) : null}
+          </section>
+
+          <section className="main-v2__section">
+            <SectionHeader
+              title="공지사항"
+              action={
+                <Link className="main-v2__text-action" to="/NoticePage">
+                  전체보기 <Icon name="chevron-right" size={16} />
+                </Link>
+              }
+            />
+            <Link className="main-v2__notice" to="/NoticePage" aria-label="공지사항 보기">
+              <img src={noticebanner} alt="" className="main-v2__notice-image" />
+            </Link>
+          </section>
+
+          <section className="main-v2__quick-grid" aria-label="문중문고 콘텐츠">
+            <Link className="main-v2__quick-link" to="/CurationPage">
+              <span className="main-v2__quick-icon"><Icon name="book" size={24} /></span>
+              <span className="main-v2__quick-copy">
+                <strong>큐레이션</strong>
+                <small>문중문고가 고른 책을 만나보세요.</small>
+              </span>
+              <Icon name="chevron-right" />
+            </Link>
+
+            <Link className="main-v2__quick-link" to="/GuidePage">
+              <span className="main-v2__quick-icon"><Icon name="info" size={24} /></span>
+              <span className="main-v2__quick-copy">
+                <strong>이용안내</strong>
+                <small>대출·반납과 문중문고 이용 방법을 확인해요.</small>
+              </span>
+              <Icon name="chevron-right" />
+            </Link>
+          </section>
         </div>
-      </div>
+      </PageContainer>
 
       <Footer />
-    </div>
+    </AppShell>
   );
 }
 
