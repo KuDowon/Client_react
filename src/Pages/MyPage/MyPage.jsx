@@ -107,7 +107,7 @@ export default function MyPage(){
                 <div className="mypage-v2__menu">
                   <button type="button" onClick={()=>navigate("/CurrentBorrow")}><span><Icon name="book"/>대출 도서</span><Icon name="chevron-right"/></button>
                   <button type="button" onClick={()=>navigate("/CurrentReserve")}><span><Icon name="clock"/>예약 도서</span><Icon name="chevron-right"/></button>
-                  <button type="button" onClick={()=>navigate("/CurrentOverrdue")}><span><Icon name="alert"/>연체 도서</span><Icon name="chevron-right"/></button>
+                  <button type="button" onClick={()=>navigate("/CurrentOverdue")}><span><Icon name="alert"/>연체 도서</span><Icon name="chevron-right"/></button>
                 </div>
               </section>
             </>
