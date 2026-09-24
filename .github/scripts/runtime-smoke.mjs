@@ -17,6 +17,7 @@ const cases = [
   { name: "borrow-empty-820", path: "/CurrentBorrow", viewport: { width: 820, height: 1180 }, expectedText: "대출 중인 도서가 없어요.", navigation: "bottom" },
   { name: "reserve-empty-1024", path: "/CurrentReserve", viewport: { width: 1024, height: 768 }, expectedText: "현재 예약 중인 도서가 없어요.", navigation: "bottom" },
   { name: "overdue-empty-1366", path: "/CurrentOverdue", viewport: { width: 1366, height: 768 }, expectedText: "연체 중인 도서가 없어요.", navigation: "bottom" },
+  { name: "overdue-from-my-820", path: "/CurrentOverdue", viewport: { width: 820, height: 1180 }, expectedText: "연체 중인 도서가 없어요.", navigation: "bottom", entryFrom: "/MyPage", expectedBackTo: "/MyPage" },
   { name: "guide-1440", path: "/GuidePage", viewport: { width: 1440, height: 900 }, expectedText: "문중문고 이용안내", navigation: "bottom" },
   { name: "curation-1024", path: "/CurationPage", viewport: { width: 1024, height: 768 }, expectedText: "수업과 관심사에 맞는 도서를 둘러보세요.", navigation: "bottom" },
 
@@ -51,6 +52,11 @@ try {
     });
 
     await page.setViewport(testCase.viewport);
+    if (testCase.entryFrom) {
+      await page.evaluateOnNewDocument((entryFrom) => {
+        window.history.replaceState({ usr: { from: entryFrom }, key: "qa-entry", idx: 0 }, "", window.location.href);
+      }, testCase.entryFrom);
+    }
     const response = await page.goto(`http://127.0.0.1:4173${testCase.path}`, {
       waitUntil: "domcontentloaded",
       timeout: 15000,
@@ -70,6 +76,13 @@ try {
       );
     } catch {
       failures.push(`${testCase.name}: expected text not rendered: ${testCase.expectedText}`);
+    }
+
+    if (testCase.expectedBackTo) {
+      const backHref = await page.$eval(".app-header .ui-icon-button", (node) => node.getAttribute("href")).catch(() => null);
+      if (backHref !== testCase.expectedBackTo) {
+        failures.push(`${testCase.name}: back link expected ${testCase.expectedBackTo} but got ${backHref}`);
+      }
     }
 
     if (testCase.filter) {
