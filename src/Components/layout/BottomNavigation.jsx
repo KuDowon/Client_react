@@ -1,0 +1,35 @@
+import React from "react";
+import { Link, useLocation } from "react-router-dom";
+import Icon from "../ui/Icon";
+
+function isActive(pathname, key) {
+  if (key === "home") return pathname === "/";
+  if (key === "loan") return pathname.startsWith("/Loan");
+  return pathname.startsWith("/My") || pathname.startsWith("/Current") || pathname.startsWith("/EditProfile");
+}
+
+export default function BottomNavigation({ onLoanReturn }) {
+  const { pathname } = useLocation();
+
+  const itemProps = (key) => ({
+    className: "app-bottom-nav__item",
+    "aria-current": isActive(pathname, key) ? "page" : undefined
+  });
+
+  return (
+    <nav className="app-bottom-nav" aria-label="주요 메뉴">
+      <Link to="/" {...itemProps("home")}>
+        <Icon name="home" size={24} />
+        <span>홈</span>
+      </Link>
+      <button type="button" onClick={onLoanReturn} {...itemProps("loan")}>
+        <Icon name="loan" size={24} />
+        <span>대출·반납</span>
+      </button>
+      <Link to="/MyPage" {...itemProps("my")}>
+        <Icon name="user" size={24} />
+        <span>마이</span>
+      </Link>
+    </nav>
+  );
+}
