@@ -1,130 +1,74 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import '../Css/SearchPage.css';
-import printnull from '../Images/printnull.png'; 
+import React, { useEffect, useState } from "react";
+import "../Css/StatusPages.css";
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+import Footer from "../Components/Footer";
+import AppHeader from "../Components/layout/AppHeader";
+import AppShell from "../Components/layout/AppShell";
+import PageContainer from "../Components/layout/PageContainer";
+import BookListItem from "../Components/library/BookListItem";
+import EmptyState from "../Components/ui/EmptyState";
+import SectionHeader from "../Components/ui/SectionHeader";
+import Skeleton from "../Components/ui/Skeleton";
+import printnull from "../Images/printnull.png";
 
-// API 통신을 위한 헬퍼 함수 (기존 코드 유지)
-const fetchCurrentRentals = async () => {
-  const token = localStorage.getItem('accessToken');
-  if (!token) return [];
+const API_BASE_URL=process.env.REACT_APP_API_BASE_URL;
 
-  try {
-    const response = await fetch(`${API_BASE_URL}/rentals/current/`, {
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`API 오류: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error('현재 연체 도서 정보 불러오기 실패:', error);
-    return [];
-  }
+const fetchCurrentRentals=async()=>{
+  const token=localStorage.getItem("accessToken");
+  if(!token)return [];
+  try{
+    const response=await fetch(`${API_BASE_URL}/rentals/current/`,{headers:{"Content-Type":"application/json",Authorization:`Bearer ${token}`}});
+    if(!response.ok)throw new Error(`API 오류: ${response.status}`);
+    return await response.json();
+  }catch(error){console.error("현재 연체 도서 정보 불러오기 실패:",error);return [];}
 };
 
-
-function CurrentOverdue() {
-  const navigate = useNavigate();
-  const [rentals, setRentals] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const getRentals = async () => {
-      try {
-        const data = await fetchCurrentRentals();
-        
-        // 연체되지 않은 도서만 필터링 (현재 대출 중)
-        const OverdueRentals = data.filter(item => item.is_overdue);
-         
-        setRentals(OverdueRentals);
-
-        // localstorage에 대출 도서 개수를 저장
-        if (OverdueRentals.length >= 0) {
-          localStorage.setItem('overdueCount', OverdueRentals.length.toString());
-        }
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-    getRentals();
-  }, []);
-
-  return (
-    <>
-      <div className="top-bar">
-        <div className="back-btn" onClick={() => navigate(-1)}>
-          ←
-        </div>
-        <h1 className="sun-title">현재 대출 도서</h1>
-      </div>
-      <div className="content">
-        {loading && <p>로딩 중...</p>}
-        {error && <p className="error-message">오류: {error}</p>}
-
-        {!loading && rentals.length === 0 && (
-          <div style={{ padding: "12px 15px", textAlign: "center", color: "#555" }}>
-            연체 중인 도서가 없습니다.
-          </div>
-        )}
-
-        {rentals.length > 0 && (
-          <section className="book-list" id="book-list">
-            {rentals.map((item) => {
-              const overdueMessage = item.is_overdue
-                ? `⚠️ ${item.overdue_days}일 연체`
-                : '';
-              const reservationStatus = item.book?.book_status === 'RESERVED' 
-                ? '예약된 도서입니다. 빠른 반납이 필요합니다.' 
-                : '';
-              const imageUrl = item.book?.image_url 
-                ? item.book.image_url 
-                : printnull; // nuImage 대신 printnull 사용
-              const bookCode = item.book?.book_code || item.id;
-
-  return (
-    <Link 
-        to={`/BookPage/${bookCode}`} 
-        className="book-card" 
-        key={item.id}
-    >
-      <div className="book-cover">
-          <img 
-          className="cover-img" 
-          src={imageUrl} 
-          alt={'도서 표지'} 
-          />
-        </div>
-      <div className="book-info">
-        <h2 className="code">코드: {bookCode}</h2>
-        <h3 className="rental-detail">대출일: {item.rental_date}</h3>
-        <h3 className="rental-detail">반납 예정일: {item.due_date}</h3>
-        <span 
-                    className="overdue-status" 
-                    style={{ fontSize: '14px', fontWeight: 'bold', color: item.is_overdue ? 'red' : 'green' }}
-                  >
-                    {overdueMessage}
-                  </span>
-        <p style={{ fontSize: '14px', fontWeight: 'normal', color: '#007bff' }}>{reservationStatus}</p>
-      </div>
-    </Link>
-              );
-          })}
-        </section>
-        )}
-      </div>
-    </>
-  );
+function LoadingRows(){
+  return <div className="status-page__loading" aria-label="연체 목록 불러오는 중">{[0,1].map((i)=><div className="status-page__loading-row" key={i}><Skeleton width={72} height={108}/><div className="status-page__loading-copy"><Skeleton width={72} height={28}/><Skeleton width="65%" height={24}/><Skeleton width="48%" height={20}/></div></div>)}</div>;
 }
 
-export default CurrentOverdue;
+export default function CurrentOverdue(){
+  const [rentals,setRentals]=useState([]);
+  const [loading,setLoading]=useState(true);
+  const [error,setError]=useState(null);
+
+  useEffect(()=>{
+    const getRentals=async()=>{
+      try{
+        const data=await fetchCurrentRentals();
+        const overdue=data.filter((item)=>item.is_overdue);
+        setRentals(overdue);
+        localStorage.setItem("overdueCount",overdue.length.toString());
+      }catch(err){setError(err.message);}finally{setLoading(false);}
+    };
+    getRentals();
+  },[]);
+
+  return (
+    <AppShell>
+      <AppHeader title="현재 연체 도서" backTo="/"/>
+      <PageContainer>
+        <section className="status-page">
+          <div className="status-page__intro">
+            <SectionHeader title="연체 중인 도서"/>
+            <p className="status-page__description">연체 도서는 가능한 빨리 반납해주세요.</p>
+          </div>
+          {loading?<LoadingRows/>:null}
+          {error?<EmptyState icon="alert" title="연체 정보를 불러오지 못했어요." description={error}/>:null}
+          {!loading&&!error&&rentals.length===0?<EmptyState icon="check" title="연체 중인 도서가 없어요." description="현재 반납이 필요한 연체 도서가 없습니다."/>:null}
+          {!loading&&!error&&rentals.length>0?(
+            <div className="status-page__list">
+              {rentals.map((item)=>{
+                const bookCode=item.book?.book_code||item.id;
+                const book={id:item.book?.id||item.id,title:item.book?.title||item.book?.book_title||`도서 ${bookCode}`,author:item.book?.author||"",publisher:item.book?.publisher||"",code:bookCode,location:item.book?.location||""};
+                const meta=[`대출일: ${item.rental_date||"-"}`,`반납 예정일: ${item.due_date||"-"}`,item.book?.book_status==="RESERVED"?"다음 예약자가 있어 빠른 반납이 필요해요.":null].filter(Boolean);
+                return <BookListItem key={item.id} book={book} cover={item.book?.image_url||printnull} detailTo={`/BookPage/${bookCode}`} statusLabel={`${item.overdue_days||0}일 연체`} statusTone="danger" meta={meta}/>;
+              })}
+            </div>
+          ):null}
+        </section>
+      </PageContainer>
+      <Footer/>
+    </AppShell>
+  );
+}
