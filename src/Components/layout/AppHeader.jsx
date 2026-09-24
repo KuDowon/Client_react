@@ -15,6 +15,7 @@ export default function AppHeader({
   onBack,
   right,
   main = false,
+  showNavigation = true,
   className = ""
 }) {
   const navigate = useNavigate();
@@ -37,11 +38,11 @@ export default function AppHeader({
       <div className="app-header__inner">
         {backControl}
         <div className="app-header__title">{title}</div>
-        <nav className="app-header__desktop-nav" aria-label="주요 메뉴">
+        {showNavigation ? <nav className="app-header__desktop-nav" aria-label="주요 메뉴">
           <Link to="/" aria-current={navActive(pathname, "home") ? "page" : undefined}>홈</Link>
           <button type="button" onClick={goToLoan} aria-current={navActive(pathname, "loan") ? "page" : undefined}>대출·반납</button>
           <Link to="/MyPage" aria-current={navActive(pathname, "my") ? "page" : undefined}>마이</Link>
-        </nav>
+        </nav> : null}
         <div className="app-header__right">{right || null}</div>
       </div>
     </header>
