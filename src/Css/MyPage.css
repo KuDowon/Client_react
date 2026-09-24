@@ -34,3 +34,7 @@
 .review-page__editor-error{font-size:12px;line-height:18px;color:var(--color-danger)}
 @media (max-width:599px){.mypage-v2__profile-meta{grid-template-columns:1fr}.mypage-v2__profile-meta dd{white-space:normal}}
 @media (min-width:768px){.mypage-v2,.profile-edit,.review-page{padding-top:40px;padding-bottom:64px}}
+
+.mypage-v2__danger-link{color:var(--color-action-danger-text)!important}
+.mypage-v2__danger-link:hover{background:var(--color-action-danger-hover)!important;color:var(--color-action-danger-text-hover)!important}
+.mypage-v2__helper{font-size:12px;line-height:18px;color:var(--color-text-tertiary)}
