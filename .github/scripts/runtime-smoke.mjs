@@ -1,19 +1,5 @@
-import { existsSync } from "node:fs";
 import { mkdir } from "node:fs/promises";
-import puppeteer from "puppeteer-core";
-
-const chromeCandidates = [
-  process.env.CHROME_PATH,
-  "/usr/bin/google-chrome",
-  "/usr/bin/google-chrome-stable",
-  "/usr/bin/chromium",
-  "/usr/bin/chromium-browser",
-].filter(Boolean);
-
-const executablePath = chromeCandidates.find((candidate) => existsSync(candidate));
-if (!executablePath) {
-  throw new Error("Chrome executable was not found on the GitHub Actions runner.");
-}
+import puppeteer from "puppeteer";
 
 const cases = [
   {
@@ -62,9 +48,8 @@ const cases = [
 await mkdir("smoke-artifacts", { recursive: true });
 
 const browser = await puppeteer.launch({
-  executablePath,
   headless: true,
-  args: ["--no-sandbox", "--disable-setuid-sandbox"],
+  args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
 });
 
 const failures = [];
