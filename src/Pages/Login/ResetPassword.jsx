@@ -1,93 +1,44 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React,{useState} from "react";
+import "../../Css/loginstyle.css";
 
-import '../../Css/loginstyle.css';
-import logoImage from '../../Images/navigation2.png';
+import AuthLayout from "../../Components/layout/AuthLayout";
+import Button from "../../Components/ui/Button";
+import Dialog from "../../Components/ui/Dialog";
+import TextField from "../../Components/ui/TextField";
 
-function ResetPassword() {
-  // 폼 입력 값을 관리하기 위한 state
-  const [name, setName] = useState('');
-  const [userId, setUserId] = useState('');
-  const [contactMethod] = useState('phone'); // 'phone' 또는 'email'
-  const [phone, setPhone] = useState('');
-  const [email, setEmail] = useState('');
+export default function ResetPassword(){
+  const [name,setName]=useState("");
+  const [userId,setUserId]=useState("");
+  const [phone,setPhone]=useState("");
+  const [error,setError]=useState("");
+  const [noticeOpen,setNoticeOpen]=useState(false);
 
-  // 비밀번호 찾기 form 제출 시 실행될 함수
-  const handleFindPassword = (event) => {
-    event.preventDefault(); // form의 기본 새로고침 동작 방지
-
-    // state 값으로 유효성 검사 수행
-    if (!name || !userId) {
-      alert("이름과 아이디를 입력해주세요.");
+  const handleFindPassword=(event)=>{
+    event.preventDefault();
+    if(!name.trim()||!userId.trim()||!phone.trim()){
+      setError("이름, 아이디, 전화번호를 모두 입력해주세요.");
       return;
     }
-    if (contactMethod === "phone" && !phone) {
-      alert("전화번호를 입력해주세요.");
-      return;
-    }
-    if (contactMethod === "email" && !email) {
-      alert("이메일을 입력해주세요.");
-      return;
-    }
-
-    alert("비밀번호 변경 절차를 시작합니다.");
-    // 여기에 실제 서버와 통신하는 로직을 추가합니다.
+    setError("");
+    setNoticeOpen(true);
   };
 
   return (
-    <div className="login-container">
-      <div className="blue-top-bar">
-          <a href="LoginPage" className="back-btn" aria-label="뒤로가기">
-            ←
-          </a>
-        </div>
-      <Link to="/">
-          <img src={logoImage} alt="로고" className="logo" />
-        </Link>
-      <h2>비밀번호 찾기</h2>
-      <form onSubmit={handleFindPassword}>
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="이름"
-          required
-        />
-        <input
-          type="text"
-          value={userId}
-          onChange={(e) => setUserId(e.target.value)}
-          placeholder="아이디"
-          required
-        />
+    <>
+      <AuthLayout title="비밀번호 찾기" description="현재 비밀번호 변경 기능은 관리자 확인을 통해 진행돼요." backTo="/LoginPage">
+        <form className="auth-form" onSubmit={handleFindPassword} noValidate>
+          <TextField label="이름" value={name} onChange={(event)=>{setName(event.target.value);if(error)setError("");}}/>
+          <TextField label="아이디" value={userId} onChange={(event)=>{setUserId(event.target.value);if(error)setError("");}}/>
+          <TextField label="전화번호" value={phone} onChange={(event)=>{setPhone(event.target.value.replace(/\D/g,"").slice(0,11));if(error)setError("");}} inputMode="numeric"/>
+          {error?<p className="auth-form__error" role="alert">{error}</p>:null}
+          <Button type="submit" size="lg" block>확인하기</Button>
+        </form>
+        <p className="auth-support">비밀번호 변경 API가 현재 화면에 연결되어 있지 않아 자동 변경은 진행하지 않아요.</p>
+      </AuthLayout>
 
-      
-
-        {/* 조건부 렌더링: 선택된 방법에 따라 다른 입력창을 보여줌 */}
-        {contactMethod === 'phone' ? (
-          <div className="contact-input">
-            <input
-              type="tel"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="전화번호"
-            />
-          </div>
-        ) : (
-          <div className="contact-input">
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="이메일"
-            />
-          </div>
-        )}
-
-        <button type="submit">비밀번호 찾기 및 변경</button>
-      </form>
-    </div>
+      <Dialog open={noticeOpen} title="관리자 문의가 필요해요." confirmLabel="확인" hideCancel onConfirm={()=>setNoticeOpen(false)} onClose={()=>setNoticeOpen(false)}>
+        입력 정보는 서버로 전송되지 않았어요. 비밀번호 변경은 문중문고 관리자에게 문의해주세요.
+      </Dialog>
+    </>
   );
 }
-
-export default ResetPassword;
