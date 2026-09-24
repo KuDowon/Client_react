@@ -11,11 +11,16 @@ const cases = [
   { name: "home-1200", path: "/", viewport: { width: 1200, height: 900 }, expectedText: "필요한 책을 쉽고 빠르게 찾아보세요.", navigation: "bottom" },
   { name: "home-1366", path: "/", viewport: { width: 1366, height: 768 }, expectedText: "필요한 책을 쉽고 빠르게 찾아보세요.", navigation: "bottom" },
   { name: "home-1440", path: "/", viewport: { width: 1440, height: 900 }, expectedText: "필요한 책을 쉽고 빠르게 찾아보세요.", navigation: "bottom" },
+  { name: "home-topmode-820", path: "/?navMode=top", viewport: { width: 820, height: 1180 }, expectedText: "필요한 책을 쉽고 빠르게 찾아보세요.", navigation: "bottom" },
+  { name: "home-topmode-1024", path: "/?navMode=top", viewport: { width: 1024, height: 768 }, expectedText: "필요한 책을 쉽고 빠르게 찾아보세요.", navigation: "top" },
+  { name: "home-topmode-1440", path: "/?navMode=top", viewport: { width: 1440, height: 900 }, expectedText: "필요한 책을 쉽고 빠르게 찾아보세요.", navigation: "top" },
+  { name: "home-bottommode-1024", path: "/?navMode=bottom", viewport: { width: 1024, height: 768 }, expectedText: "필요한 책을 쉽고 빠르게 찾아보세요.", navigation: "bottom" },
 
   { name: "search-filter-390", path: "/search", viewport: { width: 390, height: 844 }, expectedText: "검색어를 입력해주세요.", navigation: "bottom", filter: true },
   { name: "search-filter-1024", path: "/search", viewport: { width: 1024, height: 768 }, expectedText: "검색어를 입력해주세요.", navigation: "bottom", filter: true },
   { name: "search-data-390", path: "/search?query=qa", viewport: { width: 390, height: 844 }, expectedText: LONG_BOOK_TITLE, navigation: "bottom", filter: true, mockSearch: true },
   { name: "search-data-1024", path: "/search?query=qa", viewport: { width: 1024, height: 768 }, expectedText: LONG_BOOK_TITLE, navigation: "bottom", filter: true, mockSearch: true },
+  { name: "search-data-topmode-1024", path: "/search?query=qa&navMode=top", viewport: { width: 1024, height: 768 }, expectedText: LONG_BOOK_TITLE, navigation: "top", filter: true, mockSearch: true },
 
   { name: "book-data-390", path: "/BookPage/1", viewport: { width: 390, height: 844 }, expectedText: LONG_BOOK_TITLE, navigation: "bottom", mockBook: true },
   { name: "book-data-820", path: "/BookPage/1", viewport: { width: 820, height: 1180 }, expectedText: LONG_BOOK_TITLE, navigation: "bottom", mockBook: true },
@@ -189,6 +194,7 @@ try {
 
     await page.evaluateOnNewDocument((entryFrom, seedMyPage) => {
         window.localStorage.clear();
+        window.sessionStorage.clear();
         if (entryFrom) {
           window.history.replaceState({ usr: { from: entryFrom }, key: "qa-entry", idx: 0 }, "", window.location.href);
         }
@@ -270,8 +276,11 @@ try {
       const root = document.documentElement;
       const bottomNav = document.querySelector(".app-bottom-nav");
       const bottomInner = document.querySelector(".app-bottom-nav__inner");
+      const topNav = document.querySelector(".app-top-nav");
+      const topItems = [...document.querySelectorAll(".app-top-nav__item")];
       const navRect = bottomNav?.getBoundingClientRect();
       const innerRect = bottomInner?.getBoundingClientRect();
+      const topRect = topNav?.getBoundingClientRect();
       return {
         innerWidth: window.innerWidth,
         innerHeight: window.innerHeight,
@@ -283,6 +292,9 @@ try {
         innerNavLeft: innerRect?.left ?? null,
         innerNavRight: innerRect ? window.innerWidth - innerRect.right : null,
         staleDesktopNavCount: document.querySelectorAll(".app-header__desktop-nav").length,
+        topNavDisplay: topNav ? getComputedStyle(topNav).display : null,
+        topNavHeight: topRect?.height ?? null,
+        topItemWidths: topItems.map((item) => item.getBoundingClientRect().width),
       };
     });
 
@@ -313,6 +325,27 @@ try {
       }
       if (metrics.staleDesktopNavCount > 0) {
         failures.push(`${testCase.name}: stale desktop header navigation is still rendered`);
+      }
+      if (metrics.topNavDisplay && metrics.topNavDisplay !== "none") {
+        failures.push(`${testCase.name}: top navigation is visible in bottom-navigation mode`);
+      }
+    }
+
+    if (testCase.navigation === "top") {
+      if (metrics.bottomNavDisplay && metrics.bottomNavDisplay !== "none") {
+        failures.push(`${testCase.name}: bottom navigation is still visible in top-navigation mode`);
+      }
+      if (!metrics.topNavDisplay || metrics.topNavDisplay === "none") {
+        failures.push(`${testCase.name}: top navigation is not visible`);
+      }
+      if (metrics.topNavHeight !== 48) {
+        failures.push(`${testCase.name}: top navigation height expected 48px but got ${metrics.topNavHeight}`);
+      }
+      if (metrics.topItemWidths.length !== 3 || metrics.topItemWidths.some((width) => Math.abs(width - 112) > 1)) {
+        failures.push(`${testCase.name}: top navigation link widths are not consistently 112px`);
+      }
+      if (metrics.scrollWidth > metrics.innerWidth + 1) {
+        failures.push(`${testCase.name}: top-navigation mode creates horizontal overflow`);
       }
     }
 
