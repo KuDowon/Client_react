@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import {useLocation} from "react-router-dom";
 import "../Css/StatusPages.css";
 
 import Footer from "../Components/Footer";
@@ -28,6 +29,8 @@ function LoadingRows(){
 }
 
 export default function CurrentOverdue(){
+  const {state}=useLocation();
+  const backTo=state?.from==="/MyPage"?"/MyPage":"/";
   const [rentals,setRentals]=useState([]);
   const [loading,setLoading]=useState(true);
   const [error,setError]=useState(null);
@@ -46,7 +49,7 @@ export default function CurrentOverdue(){
 
   return (
     <AppShell>
-      <AppHeader title="현재 연체 도서" backTo="/"/>
+      <AppHeader title="현재 연체 도서" backTo={backTo}/>
       <PageContainer>
         <section className="status-page">
           <div className="status-page__intro">
