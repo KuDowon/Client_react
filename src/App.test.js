@@ -61,5 +61,5 @@ test("disables filter interaction when disabled", () => {
       disabled
     />
   );
-  expect(screen.getByRole("button", { name: /정렬 제목순/ })).toBeDisabled();
+  expect(screen.getByRole("button", { name: /정렬 제목순/ }).disabled).toBe(true);
 });
