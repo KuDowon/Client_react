@@ -1,86 +1,74 @@
-// src/Pages/NoticePage.jsx
+import React,{useState} from "react";
+import "../Css/NoticePage.css";
 
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import '../Css/NoticePage.css'; 
-import info1 from '../Images/info1.png';
-import info2 from '../Images/info2.png';
-import info3 from '../Images/info3.png';
-import info4 from '../Images/info4.png';
-import info5 from '../Images/info5.png';
+import Footer from "../Components/Footer";
+import AppHeader from "../Components/layout/AppHeader";
+import AppShell from "../Components/layout/AppShell";
+import PageContainer from "../Components/layout/PageContainer";
+import EmptyState from "../Components/ui/EmptyState";
+import Icon from "../Components/ui/Icon";
 
-const initialPosts = [
-  {
-    id: 1,
-    title: "문중문고 개관안내 (클릭)",
-    content: [info1, info2, info3, info4, info5],
-    date: "2025-10-13",
-    isPinned: 'True'
-  }
-];
+import info1 from "../Images/info1.png";
+import info2 from "../Images/info2.png";
+import info3 from "../Images/info3.png";
+import info4 from "../Images/info4.png";
+import info5 from "../Images/info5.png";
 
-function NoticePage() {
-  // 게시글 데이터를 상태로 관리합니다.
-  const [posts] = useState(initialPosts);
-  
-  // 현재 펼쳐진 게시글의 ID를 상태로 관리하며, 초기값은 null입니다.
-  const [openPostId, setOpenPostId] = useState(null);
+const initialPosts=[{
+  id:1,
+  title:"문중문고 개관안내",
+  content:[info1,info2,info3,info4,info5],
+  date:"2025-10-13",
+  isPinned:"True",
+}];
 
-  // 게시글 제목을 클릭하면 호출되는 함수입니다.
-  const togglePost = (id) => {
-    // 현재 열려있는 게시글의 ID와 클릭한 게시글의 ID가 같으면 닫고, 다르면 새로운 게시글을 엽니다.
-    setOpenPostId(openPostId === id ? null : id);
-  };
+export default function NoticePage(){
+  const [posts]=useState(initialPosts);
+  const [openPostId,setOpenPostId]=useState(null);
+  const togglePost=(id)=>setOpenPostId((current)=>current===id?null:id);
 
   return (
-    <div>
-      <div className="top-bar">
-        {/* React Router의 Link를 사용하여 메인 페이지로 이동합니다. */}
-        <Link to="/" className="back-btn" aria-label="뒤로가기">
-          ←
-        </Link>
-        <span className="top-tittle">공지사항</span>
-      </div>
+    <AppShell>
+      <AppHeader title="공지사항" backTo="/"/>
+      <PageContainer>
+        <section className="notice-page">
+          <div className="notice-page__intro">
+            <h1>공지사항</h1>
+            <p>문중문고 운영과 이용에 필요한 소식을 확인하세요.</p>
+          </div>
 
-      <div id="postContainer">
-        {/* 게시글이 없는 경우 조건부로 메시지를 렌더링합니다. */}
-        {posts.length === 0 ? (
-          <div className="no-posts">게시글이 없습니다.</div>
-        ) : (
-          // 게시글 배열을 순회하며 각 게시글을 동적으로 렌더링합니다.
-          posts.map(post => (
-            <div key={post.id} className="post">
-              <div 
-                className="post-title" 
-                onClick={() => togglePost(post.id)}
-              >
-                {post.title}
-              </div>
-              <div 
-                className="post-content" 
-                // openPostId 상태에 따라 내용이 보이거나 숨겨집니다.
-                style={{ display: openPostId === post.id ? 'block' : 'none' }}
-              >
-                {Array.isArray(post.content) ? (
-                  post.content.map((imageSrc, index) => (
-                    <img 
-                      key={index} 
-                      src={imageSrc} 
-                      alt={`정보 이미지 ${index + 1}`} 
-                      style={{ maxWidth: '100%', height: 'auto', marginBottom: '10px' }} // 이미지 스타일
-                    />
-                  ))
-                ) : (
-                  <p>{post.content}</p>
-                )}
-                <p><strong>작성일:</strong> {post.date}</p>
-              </div>
+          {posts.length===0?(
+            <EmptyState icon="info" title="등록된 공지가 없어요." description="새로운 소식이 등록되면 이곳에서 확인할 수 있어요."/>
+          ):(
+            <div className="notice-page__list">
+              {posts.map((post)=>{
+                const open=openPostId===post.id;
+                const panelId=`notice-panel-${post.id}`;
+                return (
+                  <article className="notice-page__item" key={post.id}>
+                    <button className="notice-page__trigger" type="button" aria-expanded={open} aria-controls={panelId} onClick={()=>togglePost(post.id)}>
+                      <span>
+                        {post.isPinned==="True"?<small>공지</small>:null}
+                        <strong>{post.title}</strong>
+                        <time>{post.date}</time>
+                      </span>
+                      <Icon name={open?"chevron-down":"chevron-right"}/>
+                    </button>
+                    {open?(
+                      <div className="notice-page__content" id={panelId}>
+                        {Array.isArray(post.content)
+                          ?post.content.map((imageSrc,index)=><img key={index} src={imageSrc} alt={`공지 안내 이미지 ${index+1}`} />)
+                          :<p>{post.content}</p>}
+                      </div>
+                    ):null}
+                  </article>
+                );
+              })}
             </div>
-          ))
-        )}
-      </div>
-    </div>
+          )}
+        </section>
+      </PageContainer>
+      <Footer/>
+    </AppShell>
   );
 }
-
-export default NoticePage;
