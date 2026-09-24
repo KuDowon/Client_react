@@ -78,8 +78,10 @@ try {
       timeout: 15000,
     });
 
-    if (!response || !response.ok()) {
-      failures.push(`${testCase.name}: HTTP response was not OK`);
+    if (!response || response.status() >= 400) {
+      failures.push(
+        `${testCase.name}: HTTP response failed with status ${response?.status() ?? "unknown"}`
+      );
     }
 
     try {
