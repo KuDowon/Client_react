@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useId, useRef } from "react";
 import Button from "./Button";
 
 export default function Dialog({
@@ -12,34 +12,93 @@ export default function Dialog({
   destructive = false,
   hideCancel = false
 }) {
+  const titleId = useId();
+  const dialogRef = useRef(null);
   const cancelRef = useRef(null);
+  const confirmRef = useRef(null);
 
   useEffect(() => {
     if (!open) return undefined;
+
+    const previousActive = document.activeElement;
+    const focusTimer = window.setTimeout(() => {
+      (hideCancel ? confirmRef.current : cancelRef.current)?.focus();
+    }, 0);
+
     const onKeyDown = (event) => {
-      if (event.key === "Escape") onClose?.();
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onClose?.();
+        return;
+      }
+
+      if (event.key !== "Tab" || !dialogRef.current) return;
+
+      const focusable = Array.from(
+        dialogRef.current.querySelectorAll(
+          'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        )
+      );
+
+      if (!focusable.length) {
+        event.preventDefault();
+        return;
+      }
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     };
+
     document.addEventListener("keydown", onKeyDown);
-    window.setTimeout(() => cancelRef.current?.focus(), 0);
-    return () => document.removeEventListener("keydown", onKeyDown);
-  }, [open, onClose]);
+
+    return () => {
+      window.clearTimeout(focusTimer);
+      document.removeEventListener("keydown", onKeyDown);
+      if (previousActive && typeof previousActive.focus === "function") {
+        previousActive.focus();
+      }
+    };
+  }, [open, hideCancel, onClose]);
 
   if (!open) return null;
 
   return (
-    <div className="ui-dialog-backdrop" onMouseDown={(event) => {
-      if (event.target === event.currentTarget) onClose?.();
-    }}>
-      <section className="ui-dialog" role="dialog" aria-modal="true" aria-labelledby="ui-dialog-title">
+    <div
+      className="ui-dialog-backdrop"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) onClose?.();
+      }}
+    >
+      <section
+        ref={dialogRef}
+        className="ui-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+      >
         <div>
-          <h2 id="ui-dialog-title" className="ui-dialog__title">{title}</h2>
+          <h2 id={titleId} className="ui-dialog__title">{title}</h2>
           {children ? <div className="ui-dialog__body">{children}</div> : null}
         </div>
         <div className="ui-dialog__actions">
           {!hideCancel ? (
-            <Button ref={cancelRef} variant="secondary" onClick={onClose}>{cancelLabel}</Button>
+            <Button ref={cancelRef} variant="secondary" onClick={onClose}>
+              {cancelLabel}
+            </Button>
           ) : null}
-          <Button variant={destructive ? "danger" : "primary"} onClick={onConfirm || onClose}>
+          <Button
+            ref={confirmRef}
+            variant={destructive ? "danger" : "primary"}
+            onClick={onConfirm || onClose}
+          >
             {confirmLabel}
           </Button>
         </div>
