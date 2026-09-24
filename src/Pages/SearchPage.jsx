@@ -13,6 +13,7 @@ import Dialog from "../Components/ui/Dialog";
 import EmptyState from "../Components/ui/EmptyState";
 import SectionHeader from "../Components/ui/SectionHeader";
 import Skeleton from "../Components/ui/Skeleton";
+import FilterSelect from "../Components/ui/FilterSelect";
 
 import printnull from "../Images/printnull.png";
 
@@ -344,13 +345,15 @@ export default function SearchPage() {
           <section className="search-results__section" aria-labelledby="search-results-title">
             <div className="search-results__toolbar">
               <SectionHeader title={q ? `“${q}” 검색 결과` : "검색 결과"} />
-              <label className="search-results__sort">
-                <span className="sr-only">검색 결과 정렬</span>
-                <select value={sortMode} onChange={(event) => setSortMode(event.target.value)}>
-                  <option value="오름차순">제목순</option>
-                  <option value="내림차순">인기순</option>
-                </select>
-              </label>
+              <FilterSelect
+                label="정렬"
+                value={sortMode}
+                options={[
+                  {value:"오름차순",label:"제목순"},
+                  {value:"내림차순",label:"인기순"}
+                ]}
+                onChange={setSortMode}
+              />
             </div>
 
             {!loading && !err ? (
