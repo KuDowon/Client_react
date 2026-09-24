@@ -6,7 +6,7 @@ const paths = {
   home: <><path d="m3 11 9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></>,
   loan: <><path d="M17 4l4 4-4 4"/><path d="M3 8h18"/><path d="M7 20l-4-4 4-4"/><path d="M21 16H3"/></>,
   "loan-return": <><path d="M17 4l4 4-4 4"/><path d="M3 8h18"/><path d="M7 20l-4-4 4-4"/><path d="M21 16H3"/></>,
-  book: <><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H11v16H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M20 5.5A2.5 2.5 0 0 0 17.5 3H13v16h4.5a2.5 2.5 0 0 1 2.5 2.5z"/></>,
+  book: <><path d="M2.5 4h5.25A4.25 4.25 0 0 1 12 8.25V21a3.75 3.75 0 0 0-3.75-3.75H2.5z"/><path d="M21.5 4h-5.25A4.25 4.25 0 0 0 12 8.25V21a3.75 3.75 0 0 1 3.75-3.75h5.75z"/></>,
   user: <><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></>,
   close: <><path d="m6 6 12 12"/><path d="m18 6-12 12"/></>,
   check: <path d="m5 12 4 4L19 6"/>,
