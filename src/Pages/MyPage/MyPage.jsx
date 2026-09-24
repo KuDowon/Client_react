@@ -105,10 +105,21 @@ export default function MyPage(){
               <section className="mypage-v2__section">
                 <SectionHeader title="도서 이용"/>
                 <div className="mypage-v2__menu">
-                  <button type="button" onClick={()=>navigate("/CurrentBorrow")}><span><Icon name="book"/>대출 도서</span><Icon name="chevron-right"/></button>
-                  <button type="button" onClick={()=>navigate("/CurrentReserve")}><span><Icon name="clock"/>예약 도서</span><Icon name="chevron-right"/></button>
-                  <button type="button" onClick={()=>navigate("/CurrentOverdue")}><span><Icon name="alert"/>연체 도서</span><Icon name="chevron-right"/></button>
+                  <button type="button" onClick={()=>navigate("/CurrentBorrow",{state:{from:"/MyPage"}})}><span><Icon name="loan-return"/>대출 도서</span><Icon name="chevron-right"/></button>
+                  <button type="button" onClick={()=>navigate("/CurrentReserve",{state:{from:"/MyPage"}})}><span><Icon name="clock"/>예약 도서</span><Icon name="chevron-right"/></button>
+                  <button type="button" onClick={()=>navigate("/CurrentOverdue",{state:{from:"/MyPage"}})}><span><Icon name="overdue"/>연체 도서</span><Icon name="chevron-right"/></button>
                 </div>
+              </section>
+
+              <section className="mypage-v2__section">
+                <SectionHeader title="계정 관리"/>
+                <div className="mypage-v2__menu">
+                  <a className="mypage-v2__danger-link" href="http://pf.kakao.com/_pHxbDn" target="_blank" rel="noopener noreferrer">
+                    <span><Icon name="trash"/>회원 탈퇴 문의</span>
+                    <Icon name="chevron-right"/>
+                  </a>
+                </div>
+                <p className="mypage-v2__helper">현재 회원 탈퇴는 관리자 확인을 통해 처리돼요.</p>
               </section>
             </>
           )}
