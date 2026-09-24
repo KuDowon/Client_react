@@ -71,6 +71,9 @@
 .ui-filter-select__trigger{min-height:44px;width:100%;padding:0 12px;border:1px solid var(--color-border-default);border-radius:var(--radius-sm);background:var(--color-surface-default);display:flex;align-items:center;gap:8px;color:var(--color-text-primary);font-size:14px;line-height:21px;font-weight:600;white-space:nowrap}
 .ui-filter-select__trigger:hover{border-color:var(--color-border-control);background:var(--color-gray-50)}
 .ui-filter-select--open .ui-filter-select__trigger{border-color:var(--color-border-focus);box-shadow:0 0 0 3px color-mix(in srgb,var(--color-blue-600) 14%,transparent)}
+.ui-filter-select--disabled .ui-filter-select__trigger{background:var(--color-disabled-bg);border-color:var(--color-border-subtle);color:var(--color-disabled-text);cursor:not-allowed}
+.ui-filter-select--disabled .ui-filter-select__label,.ui-filter-select--disabled .ui-filter-select__value{color:var(--color-disabled-text)}
+.ui-filter-select--disabled .ui-filter-select__trigger:hover{background:var(--color-disabled-bg);border-color:var(--color-border-subtle)}
 .ui-filter-select__trigger .ui-icon{transition:transform var(--duration-fast) var(--ease-standard)}
 .ui-filter-select--open .ui-filter-select__trigger .ui-icon{transform:rotate(180deg)}
 .ui-filter-select__label{color:var(--color-text-tertiary);font-weight:500}
