@@ -1,47 +1,48 @@
-// src/Pages/BookPage.jsx
-import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import '../Css/font.css';
-import '../Css/BookPage.css';
+import React, { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import "../Css/BookPage.css";
 
-const BASE = 'https://mungo.n-e.kr';
+import Footer from "../Components/Footer";
+import AppHeader from "../Components/layout/AppHeader";
+import AppShell from "../Components/layout/AppShell";
+import PageContainer from "../Components/layout/PageContainer";
+import Button from "../Components/ui/Button";
+import Dialog from "../Components/ui/Dialog";
+import EmptyState from "../Components/ui/EmptyState";
+import Icon from "../Components/ui/Icon";
+import IconButton from "../Components/ui/IconButton";
+import SectionHeader from "../Components/ui/SectionHeader";
+import Skeleton from "../Components/ui/Skeleton";
+import StatusBadge from "../Components/ui/StatusBadge";
+import printnull from "../Images/printnull.png";
 
-/** ✅ access token 추출 함수 (여러 키명 대응) */
+const BASE = "https://mungo.n-e.kr";
+
 const getAuthHeaders = () => {
-  const token =
-    localStorage.getItem('accessToken');
-
-  if (!token) {
-    console.warn('[getAuthHeaders] access token을 찾을 수 없습니다.');
-  }
+  const token = localStorage.getItem("accessToken");
+  if (!token) console.warn("[getAuthHeaders] access token을 찾을 수 없습니다.");
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
-/** ✅ fetchJSON - preflight 최소화 + timeout + 헤더 병합 순서 수정 */
 async function fetchJSON(
   path,
-  { method = 'GET', body, auth = false, headers = {}, timeoutMs = 8000 } = {}
+  { method = "GET", body, auth = false, headers = {}, timeoutMs = 8000 } = {}
 ) {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort('timeout'), timeoutMs);
+  const timer = setTimeout(() => controller.abort("timeout"), timeoutMs);
 
-  // ✅ 헤더 병합 순서 (Authorization 덮어쓰기 방지)
   const baseHeaders = {
-    Accept: 'application/json',
-    ...headers, // 사용자 헤더 먼저
-    ...(auth ? getAuthHeaders() : {}), // 인증 헤더 나중에 추가
+    Accept: "application/json",
+    ...headers,
+    ...(auth ? getAuthHeaders() : {}),
   };
 
-  if (method !== 'GET' && !('Content-Type' in baseHeaders)) {
-    baseHeaders['Content-Type'] = 'application/json';
+  if (method !== "GET" && !("Content-Type" in baseHeaders)) {
+    baseHeaders["Content-Type"] = "application/json";
   }
 
   let res;
   try {
-    console.log(`[fetchJSON] ${method} ${BASE}${path}`, {
-      headers: baseHeaders,
-      body,
-    });
     res = await fetch(`${BASE}${path}`, {
       method,
       headers: baseHeaders,
@@ -52,47 +53,55 @@ async function fetchJSON(
     clearTimeout(timer);
   }
 
-  const ct = res.headers.get('content-type') || '';
+  const contentType = res.headers.get("content-type") || "";
   const text = await res.text();
 
-  if (!ct.includes('application/json')) {
+  if (!contentType.includes("application/json")) {
     throw new Error(
-      `Expected JSON but got ${ct} ${res.status} at ${res.url}. Body: ${text.slice(0, 120)}`
+      `Expected JSON but got ${contentType} ${res.status} at ${res.url}. Body: ${text.slice(0, 120)}`
     );
   }
 
   const json = text ? JSON.parse(text) : null;
-  console.log('[fetchJSON Response]', res.status, json);
-
   if (!res.ok) {
-    const msg = json?.detail || json?.message || `HTTP ${res.status}`;
-    const err = new Error(msg);
-    err.status = res.status;
-    err.payload = json;
-    throw err;
+    const message = json?.detail || json?.message || `HTTP ${res.status}`;
+    const error = new Error(message);
+    error.status = res.status;
+    error.payload = json;
+    throw error;
   }
 
   return json;
 }
 
-/** ✅ 폴백 도서 정보 */
 const FALLBACK_BOOK = {
-  title: '-',
-  author: '-',
-  edition: '-',
-  publisher: '-',
-  format: '-',
-  callNumber: '-',
-  status: 'available',
-  series: '-',
-  details: '-',
-  notes: '-',
-  coverUrl: '',
-  MJcode:'-',
+  title: "-",
+  author: "-",
+  edition: "-",
+  publisher: "-",
+  format: "-",
+  callNumber: "-",
+  status: null,
+  series: "-",
+  details: "-",
+  notes: "-",
+  coverUrl: "",
+  code: "",
+  MJcode: "-",
 };
 
-const toText = (v) =>
-  Array.isArray(v) ? v.filter(Boolean).join(' ; ') : v ?? '-';
+const toText = (value) =>
+  Array.isArray(value) ? value.filter(Boolean).join(" ; ") : value ?? "-";
+
+function statusPresentation(status) {
+  if (!status) return null;
+  const normalized = String(status).toUpperCase();
+  if (normalized === "AVAILABLE") return { label: "대출가능", tone: "success" };
+  if (normalized === "RENTED") return { label: "대출중", tone: "neutral" };
+  if (normalized === "RESERVED") return { label: "예약중", tone: "neutral" };
+  if (normalized === "UNAVAILABLE") return { label: "대출불가", tone: "neutral" };
+  return { label: String(status), tone: "neutral" };
+}
 
 export default function BookPage() {
   const { bookId } = useParams();
@@ -104,16 +113,15 @@ export default function BookPage() {
   const [isLiked, setIsLiked] = useState(false);
   const [reviews, setReviews] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalMsg, setModalMsg] = useState('');
+  const [modalMsg, setModalMsg] = useState("");
   const [isReviewBoxOpen, setIsReviewBoxOpen] = useState(false);
-  const [newReviewText, setNewReviewText] = useState('');
+  const [newReviewText, setNewReviewText] = useState("");
 
-  const openModal = (msg) => {
-    setModalMsg(msg);
+  const openModal = (message) => {
+    setModalMsg(message);
     setIsModalOpen(true);
   };
 
-  /** ✅ URL bookId → pk 해석 */
   useEffect(() => {
     const ac = new AbortController();
 
@@ -121,7 +129,7 @@ export default function BookPage() {
       setResolving(true);
       setPk(null);
       try {
-        const raw = String(bookId ?? '').trim();
+        const raw = String(bookId ?? "").trim();
         if (!raw) return;
 
         if (/^\d+$/.test(raw)) {
@@ -137,17 +145,16 @@ export default function BookPage() {
           });
 
           const list = Array.isArray(data) ? data : data?.results ?? [];
-          const exact = list.find((b) => (b?.book_code ?? b?.bookCode) === code);
-
+          const exact = list.find((book) => (book?.book_code ?? book?.bookCode) === code);
           if (exact?.id) {
             setPk(exact.id);
             return;
           }
         }
         setPk(null);
-      } catch (e) {
-        if (e.name !== 'AbortError') {
-          console.error('[resolvePk] error:', e);
+      } catch (error) {
+        if (error.name !== "AbortError") {
+          console.error("[resolvePk] error:", error);
           setPk(null);
         }
       } finally {
@@ -161,38 +168,35 @@ export default function BookPage() {
 
   const invalidId = !Number.isFinite(pk) || pk <= 0;
 
-  /** ✅ 도서 상세 및 리뷰 로드 */
   useEffect(() => {
-    if (resolving || invalidId) return;
+    if (resolving || invalidId) return undefined;
     const ac = new AbortController();
 
     async function load() {
       try {
-        // 📍 BookPage.jsx 내 도서 상세 fetch 부분
-          const d = await fetchJSON(`/books/${pk}/`, { auth: true, timeoutMs: 8000 });
+        const detail = await fetchJSON(`/books/${pk}/`, { auth: true, timeoutMs: 8000 });
 
-          setBookData({
-            title: toText(d?.title),
-            author: toText(d?.author),
-            edition: toText(d?.edition),
-            publisher: toText(d?.publisher),
-            format: toText(d?.physical ?? d?.format),
-            callNumber: toText(d?.call_number ?? d?.callNumber ?? d?.callnumber),
-            status: d?.status ?? 'available',
-            series: toText(d?.series),
-            details: toText(d?.details),
-            notes: toText(d?.notes),
-            coverUrl: d?.image_url || '',
-            code: d?.book_code || d?.code || '', 
-            MJcode: toText(d?.book_code),
-          });
+        setBookData({
+          title: toText(detail?.title),
+          author: toText(detail?.author),
+          edition: toText(detail?.edition),
+          publisher: toText(detail?.publisher),
+          format: toText(detail?.physical ?? detail?.format),
+          callNumber: toText(detail?.call_number ?? detail?.callNumber ?? detail?.callnumber),
+          status: detail?.status ?? null,
+          series: toText(detail?.series),
+          details: toText(detail?.details),
+          notes: toText(detail?.notes),
+          coverUrl: detail?.image_url || "",
+          code: detail?.book_code || detail?.code || "",
+          MJcode: toText(detail?.book_code),
+        });
 
-
-        if (typeof d?.liked === 'boolean') setIsLiked(d.liked);
-      } catch (err) {
-        if (err.name !== 'AbortError') {
-          console.error('[BOOK DETAIL] fail:', err);
-          openModal('도서 상세 정보를 불러오지 못했습니다.');
+        if (typeof detail?.liked === "boolean") setIsLiked(detail.liked);
+      } catch (error) {
+        if (error.name !== "AbortError") {
+          console.error("[BOOK DETAIL] fail:", error);
+          openModal("도서 상세 정보를 불러오지 못했습니다.");
         }
       }
 
@@ -203,21 +207,17 @@ export default function BookPage() {
         });
         if (ac.signal.aborted) return;
 
-        const list = (Array.isArray(data) ? data : data?.results ?? []).map(
-          (r, idx) => ({
-            id: r.id ?? idx,
-            author: r.user_username ?? r.author ?? r.username ?? '익명', 
-            date: r.date
-              ? r.date.replaceAll('-', '/')
-              : (r.created_at || '').slice(0, 10).replaceAll('-', '/'),
-            content: r.content ?? '',
-          })
-        );
+        const list = (Array.isArray(data) ? data : data?.results ?? []).map((review, index) => ({
+          id: review.id ?? index,
+          author: review.user_username ?? review.author ?? review.username ?? "익명",
+          date: review.date
+            ? review.date.replaceAll("-", "/")
+            : (review.created_at || "").slice(0, 10).replaceAll("-", "/"),
+          content: review.content ?? "",
+        }));
         setReviews(list);
-      } catch (err) {
-        if (err.name !== 'AbortError') {
-          console.error('[REVIEWS LIST] fail:', err);
-        }
+      } catch (error) {
+        if (error.name !== "AbortError") console.error("[REVIEWS LIST] fail:", error);
       }
     }
 
@@ -225,21 +225,19 @@ export default function BookPage() {
     return () => ac.abort();
   }, [pk, invalidId, resolving]);
 
-  /** ✅ 좋아요 */
   const handleLikeToggle = async () => {
     if (invalidId) return;
-    const prev = isLiked;
-    setIsLiked(!prev);
+    const previous = isLiked;
+    setIsLiked(!previous);
     try {
-      await fetchJSON(`/books/${pk}/like/`, { method: 'POST', auth: true, body: {} });
-    } catch (err) {
-      console.error('[LIKE] fail:', err);
-      setIsLiked(prev);
-      openModal('좋아요 처리 중 오류가 발생했습니다.');
+      await fetchJSON(`/books/${pk}/like/`, { method: "POST", auth: true, body: {} });
+    } catch (error) {
+      console.error("[LIKE] fail:", error);
+      setIsLiked(previous);
+      openModal("좋아요 처리 중 오류가 발생했습니다.");
     }
   };
 
-  /** ✅ 리뷰 등록 */
   const handleSubmitReview = async () => {
     if (invalidId) return;
     const content = newReviewText.trim();
@@ -248,221 +246,222 @@ export default function BookPage() {
     const today = new Date();
     const optimistic = {
       id: `temp-${Date.now()}`,
-      author: '나',
+      author: "나",
       date: `${today.getFullYear()}/${today.getMonth() + 1}/${today.getDate()}`,
       content,
     };
-    setReviews((prev) => [optimistic, ...prev]);
-    setNewReviewText('');
+
+    setReviews((previous) => [optimistic, ...previous]);
+    setNewReviewText("");
     setIsReviewBoxOpen(false);
 
     try {
-      await fetchJSON(`/reviews/`, { method: 'POST', auth: true, body: { book: pk, content } });
+      await fetchJSON("/reviews/", { method: "POST", auth: true, body: { book: pk, content } });
       const listData = await fetchJSON(`/reviews/?bookId=${pk}`, { auth: false });
-      const normalized = (Array.isArray(listData)
-        ? listData
-        : listData?.results || []
-      ).map((r, idx) => ({
-        id: r.id ?? idx,
-        author: r.user_username ?? r.author ?? r.username ?? '익명', 
-        date: r.date
-          ? r.date.replaceAll('-', '/')
-          : (r.created_at || '').slice(0, 10).replaceAll('-', '/'),
-        content: r.content ?? '',
-      }));
+      const normalized = (Array.isArray(listData) ? listData : listData?.results || []).map(
+        (review, index) => ({
+          id: review.id ?? index,
+          author: review.user_username ?? review.author ?? review.username ?? "익명",
+          date: review.date
+            ? review.date.replaceAll("-", "/")
+            : (review.created_at || "").slice(0, 10).replaceAll("-", "/"),
+          content: review.content ?? "",
+        })
+      );
       setReviews(normalized);
-    } catch (err) {
-      console.error('[REVIEW CREATE] fail:', err);
-      setReviews((prev) => prev.filter((r) => r.id !== optimistic.id));
-      openModal('리뷰 등록에 실패했습니다. 로그인/권한을 확인해 주세요.');
+    } catch (error) {
+      console.error("[REVIEW CREATE] fail:", error);
+      setReviews((previous) => previous.filter((review) => review.id !== optimistic.id));
+      openModal("리뷰 등록에 실패했습니다. 로그인/권한을 확인해 주세요.");
     }
   };
 
-/** ✅ 최종 확정 버전 */
-const handleRent = async () => {
-  if (invalidId) return;
+  const handleRent = async () => {
+    if (invalidId) return;
 
-  try {
-    // bookData 안에 book_code 또는 code 필드가 있다면 그것을 사용
-    const bookCode =
-      bookData?.code || bookData?.book_code || bookData?.bookCode;
+    try {
+      const bookCode = bookData?.code || bookData?.book_code || bookData?.bookCode;
+      if (!bookCode) {
+        openModal("이 도서의 코드 정보를 찾을 수 없습니다.");
+        return;
+      }
 
-    if (!bookCode) {
-      openModal('이 도서의 코드 정보를 찾을 수 없습니다.');
-      console.warn('[RENT] 도서 코드 누락:', bookData);
-      return;
+      await fetchJSON("/rentals/", {
+        method: "POST",
+        auth: true,
+        body: { code: bookCode },
+      });
+      openModal("✅ 대출이 완료되었습니다.");
+    } catch (error) {
+      console.error("[RENT] fail:", error);
+      openModal(
+        `❌ 대출 중 오류 발생 (${error.status || "???"}): ${error.payload?.detail || JSON.stringify(error.payload)}`
+      );
     }
+  };
 
-    console.log('[RENT] 요청 시작:', { code: bookCode });
-    const res = await fetchJSON(`/rentals/`, {
-      method: 'POST',
-      auth: true,
-      body: { code: bookCode },
-    });
-    console.log('[RENT] 성공:', res);
-    openModal('✅ 대출이 완료되었습니다.');
-  } catch (err) {
-    console.error('[RENT] fail:', err);
-    console.log('[RENT] 서버 응답 payload:', err.payload);
-    openModal(
-      `❌ 대출 중 오류 발생 (${err.status || '???'}): ${
-        err.payload?.detail || JSON.stringify(err.payload)
-      }`
-    );
-  }
-};
-
-
-
-  /** ✅ 예약 */
   const handleReserve = async () => {
     if (invalidId) return;
     try {
       await fetchJSON(`/books/${pk}/reserve/`, {
-        method: 'POST',
+        method: "POST",
         auth: true,
       });
-      openModal('예약이 완료되었습니다.');
-    } catch (err) {
-      console.error('[RESERVE] fail:', err);
-      openModal('예약 중 오류가 발생했습니다.');
+      openModal("예약이 완료되었습니다.");
+    } catch (error) {
+      console.error("[RESERVE] fail:", error);
+      openModal("예약 중 오류가 발생했습니다.");
     }
   };
 
-  /** ✅ 렌더링 */
-  return (
-    <div>
-      <div className="top-bar">
-        <button onClick={() => navigate(-1)} className="back-btn" aria-label="뒤로가기">
-          ←
-        </button>
-        <span className="top-title">상세 페이지</span>
-      </div>
+  const status = statusPresentation(bookData.status);
+  const modalIsError = modalMsg.trim().startsWith("❌") || /실패|오류/.test(modalMsg);
+  const displayModalMessage = modalMsg.replace(/^[✅❌]\s*/, "");
 
-      {resolving ? (
-        <div className="container">
-          <div className="info" style={{ marginTop: 16 }}>불러오는 중...</div>
-        </div>
-      ) : invalidId ? (
-        <div className="container">
-          <div className="info" style={{ marginTop: 16 }}>
-            잘못된 도서 링크입니다. 목록에서 다시 시도해 주세요.
-          </div>
-        </div>
-      ) : (
-        <>
-          <div className="container">
-            <div className="upsection">
-              <div className="cover-section">
-                {bookData.coverUrl ? (
+  return (
+    <AppShell>
+      <AppHeader title="도서 상세" onBack={() => navigate(-1)} />
+
+      <PageContainer>
+        <div className="book-detail">
+          {resolving ? (
+            <div className="book-detail__loading">
+              <Skeleton width={132} height={198} radius={8} />
+              <div className="book-detail__loading-copy">
+                <Skeleton width={90} height={28} radius={14} />
+                <Skeleton width="80%" height={36} radius={6} />
+                <Skeleton width="48%" height={24} radius={6} />
+                <Skeleton width="62%" height={21} radius={6} />
+              </div>
+            </div>
+          ) : invalidId ? (
+            <EmptyState
+              icon="alert"
+              title="잘못된 도서 링크예요."
+              description="도서 목록으로 돌아가 다시 선택해주세요."
+              action={<Button variant="secondary" onClick={() => navigate(-1)}>이전 화면으로</Button>}
+            />
+          ) : (
+            <>
+              <section className="book-detail__hero">
+                <div className="book-detail__cover-wrap">
                   <img
-                    className="cover"
-                    src={bookData.coverUrl}
-                    alt={`${bookData.title || '도서'} 표지`}
-                    onError={(e) => {
-                      e.currentTarget.src = '/img/cover-placeholder.png';
+                    className="book-detail__cover"
+                    src={bookData.coverUrl || printnull}
+                    alt={`${bookData.title || "도서"} 표지`}
+                    onError={(event) => {
+                      event.currentTarget.src = printnull;
                     }}
                   />
-                ) : (
-                  <div className="cover">표지</div>
-                )}
-              </div>
-
-              <div className="info">
-                <p><strong>제목:</strong> <span>{bookData.title}</span></p>
-                <p><strong>저자:</strong> <span>{bookData.author}</span></p>
-                <p><strong>판사항:</strong> <span>{bookData.edition}</span></p>
-                <p><strong>청구기호:</strong> <span>{bookData.callNumber}</span></p>
-                <p><strong>등록번호:</strong> <span>{bookData.MJcode}</span></p>
-                <p><strong>장서상태:</strong> <span className={`status-${bookData.status}`}>{bookData.status}</span></p>
-              </div>
-            </div>
-
-            <div className="bbuttons-row">
-              <div className="bbutton" onClick={handleRent}>대출</div>
-              <div className="bbutton" onClick={handleReserve}>예약</div>
-              <div className="heartspqce">
-              <div className="bbutton" id="likeButton" onClick={handleLikeToggle}>
-                <span className="heart-icon">{isLiked ? '❤️' : '🤍'}</span>관심
-              </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="subject-tags">
-            <h3>상세 장서 정보</h3>
-            <p><strong>발행사항:</strong> <span>{bookData.publisher}</span></p>
-            <p><strong>형태사항:</strong> <span>{bookData.format}</span></p>
-            <p><strong>총서정보:</strong> <span>{bookData.series}</span></p>
-            <p><strong>상세정보:</strong> <span>{bookData.details}</span></p>
-            <p><strong>주기:</strong> <span>{bookData.notes}</span></p>
-          </div>
-
-          <div className="review">
-            <div className="review-header">
-              <h3>리뷰</h3>
-              <button
-                className="register-button"
-                type="button"
-                onClick={() => setIsReviewBoxOpen((p) => !p)}
-              >
-                {isReviewBoxOpen ? '닫기' : '등록'}
-              </button>
-            </div>
-
-            <div id="reviewList">
-              {reviews.map((r) => (
-                <div className="review-item" key={r.id}>
-                  <div className="review-meta">
-                    <strong>{r.author}</strong>
-                    <span className="review-date">{r.date}</span>
-                  </div>
-                  <p>{r.content}</p>
                 </div>
-              ))}
-            </div>
 
-            {isReviewBoxOpen && (
-              <div className="typobox" id="typobox">
-                <textarea
-                  id="reviewInput"
-                  rows="4"
-                  placeholder="리뷰를 입력하세요..."
-                  value={newReviewText}
-                  onChange={(e) => setNewReviewText(e.target.value)}
-                  aria-label="리뷰 입력"
-                  onKeyDown={(e) => {
-                    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') handleSubmitReview();
-                  }}
+                <div className="book-detail__identity">
+                  {status ? <StatusBadge tone={status.tone}>{status.label}</StatusBadge> : null}
+                  <div className="book-detail__title-group">
+                    <h1 className="book-detail__title">{bookData.title}</h1>
+                    <p className="book-detail__author">{bookData.author}</p>
+                    {bookData.publisher !== "-" ? <p className="book-detail__publisher">{bookData.publisher}</p> : null}
+                  </div>
+
+                  <dl className="book-detail__key-meta">
+                    <div><dt>청구기호</dt><dd>{bookData.callNumber}</dd></div>
+                    <div><dt>등록번호</dt><dd>{bookData.MJcode}</dd></div>
+                    {bookData.edition !== "-" ? <div><dt>판사항</dt><dd>{bookData.edition}</dd></div> : null}
+                  </dl>
+
+                  <div className="book-detail__actions">
+                    <Button variant="primary" size="lg" onClick={handleRent}>대출하기</Button>
+                    <Button variant="secondary" size="lg" onClick={handleReserve}>예약하기</Button>
+                    <IconButton
+                      icon={isLiked ? "heart-filled" : "heart"}
+                      label={isLiked ? "관심도서 취소" : "관심도서 설정"}
+                      variant="outline"
+                      onClick={handleLikeToggle}
+                    />
+                  </div>
+                </div>
+              </section>
+
+              <section className="book-detail__section">
+                <SectionHeader title="상세 장서 정보" />
+                <dl className="book-detail__details">
+                  <div><dt>발행사항</dt><dd>{bookData.publisher}</dd></div>
+                  <div><dt>형태사항</dt><dd>{bookData.format}</dd></div>
+                  <div><dt>총서정보</dt><dd>{bookData.series}</dd></div>
+                  <div><dt>상세정보</dt><dd>{bookData.details}</dd></div>
+                  <div><dt>주기</dt><dd>{bookData.notes}</dd></div>
+                </dl>
+              </section>
+
+              <section className="book-detail__section">
+                <SectionHeader
+                  title={`리뷰 ${reviews.length}`}
+                  action={
+                    <Button variant="tertiary" size="sm" onClick={() => setIsReviewBoxOpen((open) => !open)}>
+                      <Icon name={isReviewBoxOpen ? "close" : "edit"} size={16} />
+                      {isReviewBoxOpen ? "닫기" : "작성"}
+                    </Button>
+                  }
                 />
-                <br />
-                <button
-                  className="submit-button"
-                  type="button"
-                  onClick={handleSubmitReview}
-                >
-                  리뷰 등록
-                </button>
-              </div>
-            )}
-          </div>
-        </>
-      )}
 
-      {isModalOpen && (
-        <div className="modal open" id="popupModal">
-          <div className="modal-content">
-            <p>{modalMsg || '처리가 완료되었습니다.'}</p>
-            <button
-              className="close-btn"
-              type="button"
-              onClick={() => setIsModalOpen(false)}
-            >
-              닫기
-            </button>
-          </div>
+                {isReviewBoxOpen ? (
+                  <div className="book-detail__review-editor">
+                    <label htmlFor="reviewInput">리뷰 내용</label>
+                    <textarea
+                      id="reviewInput"
+                      rows="4"
+                      placeholder="도서에 대한 생각을 남겨주세요."
+                      value={newReviewText}
+                      onChange={(event) => setNewReviewText(event.target.value)}
+                      onKeyDown={(event) => {
+                        if ((event.ctrlKey || event.metaKey) && event.key === "Enter") handleSubmitReview();
+                      }}
+                    />
+                    <div className="book-detail__review-editor-actions">
+                      <Button variant="primary" onClick={handleSubmitReview} disabled={!newReviewText.trim()}>
+                        리뷰 등록
+                      </Button>
+                    </div>
+                  </div>
+                ) : null}
+
+                {reviews.length ? (
+                  <div className="book-detail__reviews">
+                    {reviews.map((review) => (
+                      <article className="book-detail__review" key={review.id}>
+                        <div className="book-detail__review-meta">
+                          <strong>{review.author}</strong>
+                          <time>{review.date}</time>
+                        </div>
+                        <p>{review.content}</p>
+                      </article>
+                    ))}
+                  </div>
+                ) : (
+                  <EmptyState
+                    icon="edit"
+                    title="아직 작성된 리뷰가 없어요."
+                    description="이 책을 읽었다면 첫 리뷰를 남겨보세요."
+                  />
+                )}
+              </section>
+            </>
+          )}
         </div>
-      )}
-    </div>
+      </PageContainer>
+
+      <Footer />
+
+      <Dialog
+        open={isModalOpen}
+        title={modalIsError ? "요청을 처리하지 못했어요." : "처리가 완료됐어요."}
+        confirmLabel="확인"
+        hideCancel
+        onConfirm={() => setIsModalOpen(false)}
+        onClose={() => setIsModalOpen(false)}
+      >
+        {displayModalMessage || "처리가 완료되었습니다."}
+      </Dialog>
+    </AppShell>
   );
 }
