@@ -1,0 +1,26 @@
+:root {
+  --color-gray-0:#fff;--color-gray-50:#f7f8fa;--color-gray-100:#f1f3f5;--color-gray-200:#e8ecf0;--color-gray-300:#d6dce2;--color-gray-400:#aeb7c1;--color-gray-500:#87919c;--color-gray-600:#69737d;--color-gray-700:#48515b;--color-gray-800:#2c333a;--color-gray-900:#171a1f;
+  --color-blue-50:#f2f7ff;--color-blue-100:#e7f0ff;--color-blue-200:#cfe0ff;--color-blue-300:#a8c5ff;--color-blue-400:#73a2ff;--color-blue-500:#3d7dff;--color-blue-600:#2563eb;--color-blue-700:#1d4ed8;--color-blue-800:#1e40af;--color-blue-900:#173b82;
+  --color-yellow-50:#fffcf0;--color-yellow-100:#fff8d6;--color-yellow-200:#fff2ad;--color-yellow-300:#ffe675;--color-yellow-400:#ffd84d;--color-yellow-500:#f4c430;--color-yellow-600:#c89400;--color-yellow-700:#7a5600;--color-yellow-800:#5b4100;--color-yellow-900:#3d2b00;
+  --color-success:#2d7d5b;--color-success-bg:#f2f8f5;--color-success-border:#c9e3d6;--color-success-emphasis:#216548;
+  --color-warning:#9a6a13;--color-warning-bg:#fff9eb;--color-warning-border:#e9d9a8;--color-warning-emphasis:#79510d;
+  --color-danger:#9d4a52;--color-danger-bg:#fff8f8;--color-danger-border:#e8cbce;--color-danger-emphasis:#873d45;--color-danger-pressed:#72343b;
+  --color-info:#365fbd;--color-info-bg:#f3f6fe;--color-info-border:#c8d6f4;--color-info-emphasis:#294c99;
+  --color-status-neutral:#59636e;--color-status-neutral-bg:#f5f6f8;--color-status-neutral-border:#d8dee4;--color-status-neutral-emphasis:#3f4852;
+  --color-bg-primary:var(--color-gray-0);--color-bg-secondary:var(--color-gray-50);--color-surface-default:var(--color-gray-0);--color-surface-subtle:var(--color-gray-50);
+  --color-text-primary:var(--color-gray-900);--color-text-secondary:var(--color-gray-600);--color-text-tertiary:var(--color-gray-500);--color-text-inverse:var(--color-gray-0);
+  --color-border-subtle:var(--color-gray-200);--color-border-default:var(--color-gray-300);--color-border-control:var(--color-gray-500);--color-border-focus:var(--color-blue-600);
+  --color-action-primary-bg:var(--color-blue-600);--color-action-primary-hover:var(--color-blue-700);--color-action-primary-pressed:var(--color-blue-800);--color-action-primary-text:#fff;
+  --color-action-secondary-bg:#fff;--color-action-secondary-text:var(--color-gray-800);--color-action-secondary-border:var(--color-gray-300);
+  --color-action-danger-bg:#fff;--color-action-danger-hover:#fff8f8;--color-action-danger-pressed:#fceff0;--color-action-danger-text:#9d4a52;--color-action-danger-text-hover:#873d45;--color-action-danger-text-pressed:#72343b;--color-action-danger-border:var(--color-gray-300);--color-action-danger-border-hover:#e8cbce;--color-action-danger-border-pressed:#d6a6aa;
+  --color-disabled-bg:var(--color-gray-200);--color-disabled-text:var(--color-gray-500);--color-navigation-active:var(--color-blue-600);--color-navigation-inactive:var(--color-gray-600);
+  --space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:20px;--space-6:24px;--space-8:32px;--space-10:40px;--space-12:48px;--space-16:64px;
+  --radius-xs:4px;--radius-sm:8px;--radius-md:12px;--radius-lg:16px;--radius-full:999px;
+  --control-sm:44px;--control-md:48px;--control-lg:52px;--touch-min:44px;--icon-sm:16px;--icon-md:20px;--icon-lg:24px;
+  --font-family-primary:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --shadow-floating:0 4px 16px rgb(23 26 31 / 10%);--shadow-dialog:0 12px 32px rgb(23 26 31 / 14%);--shadow-sticky:0 -2px 8px rgb(23 26 31 / 6%);
+  --layout-gutter:16px;--layout-section-gap:28px;--layout-column-gap:12px;--layout-content-max:480px;--layout-grid-columns:4;
+  --duration-fast:120ms;--duration-normal:180ms;--ease-standard:cubic-bezier(.2,0,0,1);
+}
+@media (min-width:600px){:root{--layout-gutter:24px;--layout-section-gap:32px;--layout-column-gap:20px;--layout-content-max:768px;--layout-grid-columns:8;}}
+@media (min-width:960px){:root{--layout-gutter:32px;--layout-section-gap:40px;--layout-column-gap:24px;--layout-content-max:1200px;--layout-grid-columns:12;}}
