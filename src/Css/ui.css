@@ -83,3 +83,6 @@
 .ui-skeleton{display:block;background:linear-gradient(90deg,var(--color-gray-100),var(--color-gray-50),var(--color-gray-100));background-size:200% 100%;animation:ui-skeleton-wave 1.4s ease-in-out infinite}
 @keyframes ui-skeleton-wave{0%{background-position:200% 0}100%{background-position:-200% 0}}
 @media (prefers-reduced-motion:reduce){.ui-skeleton{animation:none;background:var(--color-gray-100)}}
+
+.search-bar-v2{width:100%;max-width:800px;display:flex;flex-direction:column;gap:8px}
+.search-bar-v2__error{font-size:12px;line-height:18px;color:var(--color-danger)}
