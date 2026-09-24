@@ -1,7 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import Button from "../ui/Button";
-import Icon from "../ui/Icon";
 import IconButton from "../ui/IconButton";
 import StatusBadge from "../ui/StatusBadge";
 
@@ -11,7 +10,9 @@ export default function BookListItem({
   detailTo,
   statusLabel,
   statusTone="neutral",
+  meta=[],
   actionLabel,
+  actionVariant="secondary",
   actionDisabled=false,
   onAction,
   onToggleFavorite
@@ -23,35 +24,44 @@ export default function BookListItem({
       </Link>
 
       <div className="book-list-item__content">
-        <div className="book-list-item__meta-top">
-          <StatusBadge tone={statusTone}>{statusLabel}</StatusBadge>
-        </div>
+        {statusLabel ? (
+          <div className="book-list-item__meta-top">
+            <StatusBadge tone={statusTone}>{statusLabel}</StatusBadge>
+          </div>
+        ) : null}
         <Link className="book-list-item__title-link" to={detailTo}>
           <h2 className="book-list-item__title">{book.title}</h2>
         </Link>
-        <p className="book-list-item__author">{book.author || "저자 정보 없음"}</p>
+        {book.author ? <p className="book-list-item__author">{book.author}</p> : null}
         {book.publisher ? <p className="book-list-item__metadata">{book.publisher}</p> : null}
+        {meta.map((line,index)=><p className="book-list-item__metadata" key={`${line}-${index}`}>{line}</p>)}
         <div className="book-list-item__submeta">
           {book.code ? <span>{book.code}</span> : null}
           {book.location ? <span>{book.location}</span> : null}
         </div>
       </div>
 
-      <div className="book-list-item__actions">
-        <IconButton
-          icon={book.liked ? "heart-filled" : "heart"}
-          label={book.liked ? "관심도서 취소" : "관심도서 설정"}
-          onClick={() => onToggleFavorite?.(book.id)}
-        />
-        <Button
-          variant="secondary"
-          size="sm"
-          disabled={actionDisabled}
-          onClick={() => onAction?.(book)}
-        >
-          {actionLabel}
-        </Button>
-      </div>
+      {(onToggleFavorite || actionLabel) ? (
+        <div className="book-list-item__actions">
+          {onToggleFavorite ? (
+            <IconButton
+              icon={book.liked ? "heart-filled" : "heart"}
+              label={book.liked ? "관심도서 취소" : "관심도서 설정"}
+              onClick={() => onToggleFavorite(book.id)}
+            />
+          ) : null}
+          {actionLabel ? (
+            <Button
+              variant={actionVariant}
+              size="sm"
+              disabled={actionDisabled}
+              onClick={() => onAction?.(book)}
+            >
+              {actionLabel}
+            </Button>
+          ) : null}
+        </div>
+      ) : null}
     </article>
   );
 }
