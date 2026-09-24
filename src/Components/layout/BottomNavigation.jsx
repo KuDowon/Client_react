@@ -18,18 +18,20 @@ export default function BottomNavigation({ onLoanReturn }) {
 
   return (
     <nav className="app-bottom-nav" aria-label="주요 메뉴">
-      <Link to="/" {...itemProps("home")}>
-        <Icon name="home" size={24} />
-        <span>홈</span>
-      </Link>
-      <button type="button" onClick={onLoanReturn} {...itemProps("loan")}>
-        <Icon name="loan" size={24} />
-        <span>대출·반납</span>
-      </button>
-      <Link to="/MyPage" {...itemProps("my")}>
-        <Icon name="user" size={24} />
-        <span>마이</span>
-      </Link>
+      <div className="app-bottom-nav__inner">
+        <Link to="/" {...itemProps("home")}>
+          <Icon name="home" size={24} />
+          <span>홈</span>
+        </Link>
+        <button type="button" onClick={onLoanReturn} {...itemProps("loan")}>
+          <Icon name="loan-return" size={24} />
+          <span>대출·반납</span>
+        </button>
+        <Link to="/MyPage" {...itemProps("my")}>
+          <Icon name="user" size={24} />
+          <span>마이</span>
+        </Link>
+      </div>
     </nav>
   );
 }
