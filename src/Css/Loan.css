@@ -1,111 +1,14 @@
-
-
-.lsection {
-  display: flex;
-  height: 40vh;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  border: 2px solid #ccc;
-  border-radius: 8px;
-  background-color: #FFFDE7;
-  padding: 20px;
-  box-sizing: border-box;
-  cursor: pointer;
-  transition: background 0.3s ease;
-}
-
-.lsection:hover {
-  background: #E3F2FD;
-}
-
-p {
-  font-size: 16px;
-  margin: 0;
-}
-
-    .loan-container {
-        width: 480px;
-        margin: 0 auto;
-        background-color: #ffffff;
-        min-height: 100vh;
-        padding: 20px 16px;
-        box-sizing: border-box;
-        display: flex;
-        flex-direction: column;
-        align-items: center; 
-        text-align: center;
-    }
-
-    .logo {
-      width: 180px;
-      margin-top: 30px;   
-      margin-bottom: 30px;
-    }
-
-    .number-input {
-      padding: 10px 5px;
-      font-size: 16px;
-      width: 220px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      box-sizing: border-box;
-    }
-
-    .submit-btn {
-      margin-top: 20px;
-      padding: 10px 5px;
-      background-color: #333;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 16px;
-      box-sizing: border-box;
-      width: 220px;
-      text-align: center;
-      align-items: center; 
-    }
-
-    .submit-btn:hover {
-      background-color: #555;
-    }
-
-.sub-title {
-  font-size: 20px;
-  margin: 0;
-}
-
-h1 {
-    font-size: 20px;
-    margin: 0;
-}
-
-.loan-form {
-  width: 100%;
-}
-
-.number-input {
-  width: 100%;
-  box-sizing: border-box;
-}
-
-
-.input-guide {
-    font-size: 10px;
-  color: #777;
-  margin-top: 4px;
-  text-align: center;
-  width: 100%; 
-}
-
-.caption {
-    font-size: 10px;
-  color: #777;
-  margin-top: 10px;
-  text-align: center;
-  width: 100%;
-  font-weight: light; 
-}
-
+.loan-choice,.loan-action{padding:32px 0 48px;display:flex;flex-direction:column;gap:24px;max-width:760px}
+.loan-choice__intro,.loan-action__intro{display:flex;flex-direction:column;gap:8px}
+.loan-choice__intro h1,.loan-action__intro h1{font-size:24px;line-height:36px;font-weight:700;letter-spacing:-.015em;word-break:keep-all}
+.loan-choice__intro p,.loan-action__intro p{font-size:15px;line-height:23px;color:var(--color-text-secondary);word-break:keep-all}
+.loan-choice__grid{display:grid;grid-template-columns:1fr;gap:12px}
+.loan-choice__card{min-height:112px;padding:20px;border:1px solid var(--color-border-subtle);border-radius:var(--radius-md);display:grid;grid-template-columns:48px minmax(0,1fr) 20px;align-items:center;gap:16px;text-decoration:none;background:var(--color-surface-default);color:var(--color-text-primary);transition:background-color var(--duration-fast) var(--ease-standard),border-color var(--duration-fast) var(--ease-standard)}
+.loan-choice__card:hover{background:var(--color-gray-50);border-color:var(--color-gray-300)}
+.loan-choice__icon{width:48px;height:48px;border-radius:12px;background:var(--color-blue-50);color:var(--color-blue-700);display:grid;place-items:center}
+.loan-choice__copy{display:flex;flex-direction:column;gap:4px}
+.loan-choice__copy strong{font-size:18px;line-height:27px;font-weight:600}
+.loan-choice__copy small{font-size:13px;line-height:20px;color:var(--color-text-secondary)}
+.loan-v2-form{width:100%;max-width:480px;display:flex;flex-direction:column;gap:16px}
+.loan-v2-form__caption{display:flex;flex-direction:column;gap:4px;padding:16px;border-radius:var(--radius-sm);background:var(--color-gray-50);font-size:12px;line-height:18px;color:var(--color-text-secondary);text-align:left}
+@media (min-width:600px){.loan-choice,.loan-action{padding-top:40px}.loan-choice__grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
