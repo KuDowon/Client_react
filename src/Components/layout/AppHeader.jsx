@@ -2,6 +2,8 @@ import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Icon from "../ui/Icon";
 import IconButton from "../ui/IconButton";
+import TopNavigation from "./TopNavigation";
+import { useNavigationMode } from "./navigationMode";
 
 export default function AppHeader({
   title = "문중문고",
@@ -9,9 +11,11 @@ export default function AppHeader({
   onBack,
   right,
   main = false,
+  showNavigation = true,
   className = ""
 }) {
   const navigate = useNavigate();
+  const navigationMode = useNavigationMode();
 
   const backControl = main ? null : backTo ? (
     <Link to={backTo} className="ui-icon-button" aria-label="뒤로가기">
@@ -28,6 +32,7 @@ export default function AppHeader({
         <div className="app-header__title">{title}</div>
         <div className="app-header__right">{right || null}</div>
       </div>
+      {showNavigation && navigationMode === "top" ? <TopNavigation /> : null}
     </header>
   );
 }
