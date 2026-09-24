@@ -1,6 +1,10 @@
 import { Routes, Route, Link } from 'react-router-dom';
+import './Css/tokens.css';
 import './Css/font.css';
+import './Css/base.css';
+import './Css/layout.css';
 import './Css/toolkit.css';
+import './Css/ui.css';
 
 /* MainPage */
 import MainPage from './Pages/MainPage.jsx';
