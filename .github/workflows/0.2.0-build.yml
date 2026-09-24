@@ -33,7 +33,7 @@ jobs:
         run: npm test -- --watchAll=false
 
       - name: Install runtime QA tools
-        run: npm install --no-save --no-audit --no-fund serve puppeteer-core
+        run: npm install --no-save --no-audit --no-fund serve puppeteer
 
       - name: Responsive browser smoke
         run: |
