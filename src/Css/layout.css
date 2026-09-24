@@ -4,3 +4,6 @@
 .layout-grid{display:grid;grid-template-columns:repeat(var(--layout-grid-columns),minmax(0,1fr));gap:var(--layout-column-gap)}
 .app-shell{min-height:100dvh;background:var(--color-bg-primary);color:var(--color-text-primary)}
 .app-shell__main{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+@media (min-width:960px){
+  .app-shell--top-mode .app-shell__main{padding-bottom:0}
+}
