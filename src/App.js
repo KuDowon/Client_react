@@ -1,9 +1,8 @@
-import { Routes, Route, Link } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import './Css/tokens.css';
 import './Css/font.css';
 import './Css/base.css';
 import './Css/layout.css';
-import './Css/toolkit.css';
 import './Css/ui.css';
 import './Css/library.css';
 
@@ -47,18 +46,7 @@ function App() {
         <Route path="/CurrentBorrow" element={<CurrentBorrow />} />
         <Route path="/CurrentOverdue" element={<CurrentOverdue />} />
         <Route path="/CurrentReserve" element={<CurrentReserve/>} />
-        <Route
-          path="/current_reserve"
-          element={
-            <>
-              <div className="top-bar">
-                <Link to="/" className="back-btn" aria-label="뒤로가기">←</Link>
-                <span className="top-tittle">현재 예약 중인 도서</span>
-              </div>
-              
-            </>
-          }
-        />
+        <Route path="/current_reserve" element={<Navigate to="/CurrentReserve" replace />} />
 
         {/* 일반 페이지 */}
         <Route path="/NoticePage" element={<NoticePage />} />
