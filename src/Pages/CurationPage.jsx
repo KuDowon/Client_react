@@ -6,6 +6,7 @@ import AppHeader from "../Components/layout/AppHeader";
 import AppShell from "../Components/layout/AppShell";
 import PageContainer from "../Components/layout/PageContainer";
 import EmptyState from "../Components/ui/EmptyState";
+import Tabs from "../Components/ui/Tabs";
 
 const CURATION_DATA={
   guide:{
@@ -39,22 +40,36 @@ export default function CurationPage(){
             <p>수업과 관심사에 맞는 도서를 둘러보세요.</p>
           </div>
 
-          <div className="curation-tabs" role="tablist" aria-label="큐레이션 종류">
-            <button type="button" role="tab" aria-selected={activeTab==="guide"} className={activeTab==="guide"?"active":""} onClick={()=>handleTabClick("guide")}>강의 교재·자료</button>
-            <button type="button" role="tab" aria-selected={activeTab==="notice"} className={activeTab==="notice"?"active":""} onClick={()=>handleTabClick("notice")}>추천도서</button>
-          </div>
+          <Tabs
+            idPrefix="curation-main"
+            className="curation-tabs"
+            ariaLabel="큐레이션 종류"
+            value={activeTab}
+            onChange={handleTabClick}
+            tabs={[
+              {value:"guide",label:"강의 교재·자료"},
+              {value:"notice",label:"추천도서"}
+            ]}
+          />
 
           {activeTab==="guide"?(
-            <div className="curation-subtabs" role="tablist" aria-label="교재 분야">
-              {[
-                ["basic","전공기초"],["required","전공필수"],["major","전공"],["liberal","교양"],["related","타전공"]
-              ].map(([key,label])=>(
-                <button key={key} type="button" role="tab" aria-selected={activeSubTab===key} className={activeSubTab===key?"active":""} onClick={()=>setActiveSubTab(key)}>{label}</button>
-              ))}
-            </div>
+            <Tabs
+              idPrefix="curation-sub"
+              className="curation-subtabs"
+              ariaLabel="교재 분야"
+              value={activeSubTab}
+              onChange={setActiveSubTab}
+              tabs={[
+                {value:"basic",label:"전공기초"},
+                {value:"required",label:"전공필수"},
+                {value:"major",label:"전공"},
+                {value:"liberal",label:"교양"},
+                {value:"related",label:"타전공"}
+              ]}
+            />
           ):null}
 
-          <div className="curation-page__content">
+          <div className="curation-page__content" role="tabpanel" id={`curation-main-panel-${activeTab}`} aria-labelledby={`curation-main-tab-${activeTab}`} tabIndex={0}>
             {data.books.length===0?(
               <EmptyState icon="book" title={data.title} description="도서 목록을 준비하고 있어요."/>
             ):(
