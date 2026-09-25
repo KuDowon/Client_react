@@ -14,6 +14,7 @@ import EmptyState from "../Components/ui/EmptyState";
 import SectionHeader from "../Components/ui/SectionHeader";
 import Skeleton from "../Components/ui/Skeleton";
 import FilterSelect from "../Components/ui/FilterSelect";
+import Toast from "../Components/ui/Toast";
 
 import printnull from "../Images/printnull.png";
 
@@ -82,24 +83,14 @@ async function searchBooksAPI(query, page = 1) {
   }));
 }
 
-async function toggleLikeAPI(bookId, like) {
-  const callA = () =>
+async function toggleLikeAPI(bookId) {
+  const request = () =>
     fetch(`${API_BASE_URL}/books/${bookId}/like/`, {
       method: "POST",
       headers: authHeaders(),
-      body: JSON.stringify({ like }),
     });
 
-  let res = await withRefreshRetry(callA);
-  if (!res.ok && (res.status === 404 || res.status === 405)) {
-    const callB = () =>
-      fetch(`${API_BASE_URL}/likes/toggle/`, {
-        method: "POST",
-        headers: authHeaders(),
-        body: JSON.stringify({ book_id: bookId, like }),
-      });
-    res = await withRefreshRetry(callB);
-  }
+  const res = await withRefreshRetry(request);
   if (!res.ok) throw new Error(`좋아요 실패: ${res.status}`);
   return res.json().catch(() => ({}));
 }
@@ -111,7 +102,7 @@ function getStatusInfo(status) {
     case "RENTED":
       return { label: "대출중", tone: "neutral", actionLabel: "예약하기", disabled: false };
     case "RESERVED":
-      return { label: "예약중", tone: "neutral", actionLabel: "예약중", disabled: false };
+      return { label: "예약중", tone: "neutral", actionLabel: "예약중", disabled: true };
     case "UNAVAILABLE":
       return { label: "대출불가", tone: "neutral", actionLabel: "대출불가", disabled: true };
     default:
@@ -150,8 +141,15 @@ export default function SearchPage() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [confirmLoanState, setConfirmLoanState] = useState({ isOpen: false, book: null });
   const [confirmReserveState, setConfirmReserveState] = useState({ isOpen: false, book: null });
+  const [toast, setToast] = useState(null);
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!toast) return undefined;
+    const timer = window.setTimeout(() => setToast(null), 2400);
+    return () => window.clearTimeout(timer);
+  }, [toast]);
 
   useEffect(() => {
     let alive = true;
@@ -310,13 +308,21 @@ export default function SearchPage() {
       return;
     }
 
-    setBooks((prev) => prev.map((book) => (book.id === id ? { ...book, liked: !book.liked } : book)));
+    const currentBook = books.find((book) => book.id === id);
+    if (!currentBook) return;
+    const nextLiked = !currentBook.liked;
+
+    setBooks((prev) => prev.map((book) => (book.id === id ? { ...book, liked: nextLiked } : book)));
 
     try {
-      const currentBook = books.find((book) => book.id === id);
-      await toggleLikeAPI(id, !currentBook?.liked);
+      await toggleLikeAPI(id);
+      setToast({
+        tone: "success",
+        message: nextLiked ? "관심도서에 저장했어요." : "관심도서에서 삭제했어요."
+      });
     } catch (error) {
-      setBooks((prev) => prev.map((book) => (book.id === id ? { ...book, liked: !book.liked } : book)));
+      setBooks((prev) => prev.map((book) => (book.id === id ? { ...book, liked: currentBook.liked } : book)));
+      setToast({ tone: "danger", message: "관심도서 저장에 실패했어요. 잠시 후 다시 시도해주세요." });
       console.error("좋아요 실패:", error);
     }
   };
@@ -324,7 +330,7 @@ export default function SearchPage() {
   const handleBookAction = (book) => {
     if (book.status === "AVAILABLE") {
       handleLoanClick(book);
-    } else if (book.status === "RENTED" || book.status === "RESERVED") {
+    } else if (book.status === "RENTED") {
       handleReserveClick(book);
     }
   };
@@ -454,6 +460,12 @@ export default function SearchPage() {
       >
         대출·예약·관심도서 기능을 이용하려면 먼저 로그인해주세요.
       </Dialog>
+
+      {toast ? (
+        <div className="ui-toast-stack" aria-live="polite">
+          <Toast tone={toast.tone}>{toast.message}</Toast>
+        </div>
+      ) : null}
     </AppShell>
   );
 }
