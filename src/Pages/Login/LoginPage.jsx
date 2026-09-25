@@ -1,5 +1,5 @@
 import React,{useState} from "react";
-import {Link,useNavigate} from "react-router-dom";
+import {Link,useLocation,useNavigate} from "react-router-dom";
 import "../../Css/loginstyle.css";
 
 import AuthLayout from "../../Components/layout/AuthLayout";
@@ -12,6 +12,8 @@ export default function LoginPage(){
   const [error,setError]=useState("");
   const [submitting,setSubmitting]=useState(false);
   const navigate=useNavigate();
+  const location=useLocation();
+  const returnTo=location.state?.returnTo||"/";
 
   const handleLogin=async(event)=>{
     event.preventDefault();
@@ -38,7 +40,7 @@ export default function LoginPage(){
           localStorage.setItem("accessToken",data.access);
           localStorage.setItem("refreshToken",data.refresh);
           localStorage.setItem("userID",loggedInUsername);
-          navigate("/");
+          navigate(returnTo,{replace:true});
         }else{
           setError(data.message||"로그인 처리 중 예기치 않은 응답이 발생했습니다.");
           console.error("로그인 실패 - 예상치 못한 응답:",data);
