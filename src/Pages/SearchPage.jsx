@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import "../Css/SearchPage.css";
 
 import Footer from "../Components/Footer";
@@ -15,6 +15,7 @@ import EmptyState from "../Components/ui/EmptyState";
 import SectionHeader from "../Components/ui/SectionHeader";
 import Skeleton from "../Components/ui/Skeleton";
 import FilterSelect from "../Components/ui/FilterSelect";
+import FilterChip from "../Components/ui/FilterChip";
 import Toast from "../Components/ui/Toast";
 
 import printnull from "../Images/printnull.png";
@@ -107,7 +108,7 @@ function getStatusInfo(status) {
     case "UNAVAILABLE":
       return { label: "대출불가", tone: "neutral", actionLabel: "대출불가", disabled: true };
     default:
-      return { label: "상태확인", tone: "neutral", actionLabel: "상태확인", disabled: false };
+      return { label: "상태 확인 필요", tone: "neutral", actionLabel: "이용 불가", disabled: true };
   }
 }
 
@@ -133,7 +134,8 @@ export default function SearchPage() {
   const [books, setBooks] = useState([]);
   const [queryParams] = useSearchParams();
   const q = queryParams.get("query") || "";
-  const [sortMode, setSortMode] = useState("오름차순");
+  const [sortMode, setSortMode] = useState("관련도순");
+  const [filterMode, setFilterMode] = useState("all");
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState(null);
   const [retryKey, setRetryKey] = useState(0);
@@ -144,8 +146,10 @@ export default function SearchPage() {
   const [confirmLoanState, setConfirmLoanState] = useState({ isOpen: false, book: null });
   const [confirmReserveState, setConfirmReserveState] = useState({ isOpen: false, book: null });
   const [toast, setToast] = useState(null);
+  const [pendingAction, setPendingAction] = useState(null);
 
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     if (!toast) return undefined;
@@ -180,24 +184,32 @@ export default function SearchPage() {
 
   const executeLoan = async () => {
     const book = confirmLoanState.book;
-    setConfirmLoanState({ isOpen: false, book: null });
-
-    if (!book || !book.code) {
-      setModalMessage("❌ 도서 등록 정보가 누락되어 대출할 수 없습니다.");
-      setIsModalOpen(true);
+    if (!book || !book.code || pendingAction) {
+      if (!book?.code) {
+        setModalMessage("도서 등록 정보가 누락되어 대출할 수 없어요.");
+        setIsModalOpen(true);
+      }
       return;
     }
 
+    setPendingAction("loan");
     try {
       await submitLoanRequest(book.code);
-      setModalMessage("✅ 대출되었습니다");
-      setIsModalOpen(true);
+      setConfirmLoanState({ isOpen: false, book: null });
+      setToast({
+        tone: "success",
+        message: "대출이 완료됐어요.",
+        actionLabel: "대출 현황 보기",
+        actionTo: "/CurrentBorrow"
+      });
       const list = await searchBooksAPI(q);
       setBooks(list);
     } catch (error) {
-      setModalMessage(error.message);
+      setModalMessage("대출을 완료하지 못했어요. 잠시 후 다시 시도해주세요.");
       setIsModalOpen(true);
-      console.error("[SearchPage] Loan Error:", error.message);
+      console.error("[SearchPage] Loan Error:", error);
+    } finally {
+      setPendingAction(null);
     }
   };
 
@@ -212,7 +224,7 @@ export default function SearchPage() {
 
       if (!response.ok) {
         const errorMessage = result.message || `예약 실패: ${response.status}`;
-        const error = new Error("❌ " + errorMessage);
+        const error = new Error(errorMessage);
         error.status = response.status;
         error.payload = result;
         throw error;
@@ -220,33 +232,38 @@ export default function SearchPage() {
 
       return result;
     } catch (error) {
-      if (!error.message.startsWith("❌")) {
-        error.message = "❌ " + (error.message || "예약 요청 중 알 수 없는 오류가 발생했습니다.");
-      }
       throw error;
     }
   }
 
   const executeReserve = async () => {
     const book = confirmReserveState.book;
-    setConfirmReserveState({ isOpen: false, book: null });
-
-    if (!book || !book.id) {
-      setModalMessage("❌ 예약에 필요한 도서 정보가 누락되었습니다.");
-      setIsModalOpen(true);
+    if (!book || !book.id || pendingAction) {
+      if (!book?.id) {
+        setModalMessage("예약에 필요한 도서 정보가 누락되어 있어요.");
+        setIsModalOpen(true);
+      }
       return;
     }
 
+    setPendingAction("reserve");
     try {
       await submitReserveRequest(book.id);
-      setModalMessage("✅ 예약이 완료되었습니다");
-      setIsModalOpen(true);
+      setConfirmReserveState({ isOpen: false, book: null });
+      setToast({
+        tone: "success",
+        message: "예약이 완료됐어요.",
+        actionLabel: "예약 현황 보기",
+        actionTo: "/CurrentReserve"
+      });
       const list = await searchBooksAPI(q);
       setBooks(list);
     } catch (error) {
-      setModalMessage(error.message);
+      setModalMessage("예약을 완료하지 못했어요. 잠시 후 다시 시도해주세요.");
       setIsModalOpen(true);
-      console.error("[SearchPage] Reserve Error:", error.message);
+      console.error("[SearchPage] Reserve Error:", error);
+    } finally {
+      setPendingAction(null);
     }
   };
 
@@ -256,7 +273,7 @@ export default function SearchPage() {
       return;
     }
     if (!book.id) {
-      setModalMessage("❌ 예약에 필요한 도서 정보가 누락되었습니다.");
+      setModalMessage("예약에 필요한 도서 정보가 누락되어 있어요.");
       setIsModalOpen(true);
       return;
     }
@@ -269,7 +286,7 @@ export default function SearchPage() {
       return;
     }
     if (!book.code || book.code.length === 0) {
-      setModalMessage("❌ 대출에 필요한 도서 등록 정보(Code)가 누락되었습니다.");
+      setModalMessage("대출에 필요한 도서 등록 정보가 누락되어 있어요.");
       setIsModalOpen(true);
       return;
     }
@@ -284,25 +301,25 @@ export default function SearchPage() {
 
   const closeModal = () => setIsModalOpen(false);
 
-  const MainPageNavigate = () => {
-    setIsModalOpen(false);
-    navigate("/");
-  };
-
   const navigateToLogin = () => {
     setIsLoginModalOpen(false);
-    navigate("/LoginPage");
+    navigate("/LoginPage", {
+      state: { returnTo: location.pathname + location.search }
+    });
   };
 
-  const sorted = useMemo(() => {
-    const list = [...books];
-    if (sortMode === "오름차순") {
+  const visibleBooks = useMemo(() => {
+    const list = filterMode === "available"
+      ? books.filter((book) => book.status === "AVAILABLE")
+      : [...books];
+
+    if (sortMode === "제목순") {
       list.sort((a, b) => (a.title || "").localeCompare(b.title || "", "ko"));
-    } else {
+    } else if (sortMode === "인기순") {
       list.sort((a, b) => (b.popularity ?? 0) - (a.popularity ?? 0));
     }
     return list;
-  }, [books, sortMode]);
+  }, [books, sortMode, filterMode]);
 
   const onToggleHeart = async (id) => {
     if (!isLoggedIn()) {
@@ -337,8 +354,7 @@ export default function SearchPage() {
     }
   };
 
-  const modalIsError = modalMessage.trim().startsWith("❌");
-  const displayModalMessage = modalMessage.replace(/^[✅❌]\s*/, "");
+  const displayModalMessage = modalMessage;
 
   return (
     <AppShell>
@@ -357,16 +373,22 @@ export default function SearchPage() {
                 label="정렬"
                 value={sortMode}
                 options={[
-                  {value:"오름차순",label:"제목순"},
-                  {value:"내림차순",label:"인기순"}
+                  {value:"관련도순",label:"관련도순"},
+                  {value:"제목순",label:"제목순"},
+                  {value:"인기순",label:"인기순"}
                 ]}
                 onChange={setSortMode}
               />
             </div>
 
+            <div className="search-results__filters" role="group" aria-label="대출 상태 필터">
+              <FilterChip selected={filterMode === "all"} onClick={() => setFilterMode("all")}>전체</FilterChip>
+              <FilterChip selected={filterMode === "available"} onClick={() => setFilterMode("available")}>대출 가능</FilterChip>
+            </div>
+
             {!loading && !err ? (
               <p id="search-results-title" className="search-results__count">
-                {sorted.length}권의 도서를 찾았어요.
+                {visibleBooks.length}권의 도서를 찾았어요.
               </p>
             ) : null}
 
@@ -376,12 +398,12 @@ export default function SearchPage() {
               <EmptyState
                 icon="alert"
                 title="검색 결과를 불러오지 못했어요."
-                description={String(err.message || err)}
+                description="잠시 후 다시 시도해주세요."
                 action={<Button variant="secondary" onClick={() => setRetryKey((value) => value + 1)}>다시 시도</Button>}
               />
             ) : null}
 
-            {!loading && !err && sorted.length === 0 ? (
+            {!loading && !err && visibleBooks.length === 0 ? (
               <EmptyState
                 icon="search"
                 title={q ? "검색 결과가 없어요." : "검색어를 입력해주세요."}
@@ -389,9 +411,9 @@ export default function SearchPage() {
               />
             ) : null}
 
-            {!loading && !err && sorted.length > 0 ? (
+            {!loading && !err && visibleBooks.length > 0 ? (
               <div className="search-results__list">
-                {sorted.map((book) => {
+                {visibleBooks.map((book) => {
                   const status = getStatusInfo(book.status);
                   return (
                     <BookListItem
@@ -422,7 +444,8 @@ export default function SearchPage() {
         confirmLabel="대출하기"
         cancelLabel="취소"
         onConfirm={executeLoan}
-        onClose={closeConfirmModal}
+        onClose={() => { if (!pendingAction) closeConfirmModal(); }}
+        confirmLoading={pendingAction === "loan"}
       >
         {confirmLoanState.book
           ? `[${confirmLoanState.book.code}] ${confirmLoanState.book.title}`
@@ -435,7 +458,8 @@ export default function SearchPage() {
         confirmLabel="예약하기"
         cancelLabel="취소"
         onConfirm={executeReserve}
-        onClose={closeConfirmModal}
+        onClose={() => { if (!pendingAction) closeConfirmModal(); }}
+        confirmLoading={pendingAction === "reserve"}
       >
         {confirmReserveState.book
           ? `[${confirmReserveState.book.code}] ${confirmReserveState.book.title}`
@@ -444,10 +468,10 @@ export default function SearchPage() {
 
       <Dialog
         open={isModalOpen}
-        title={modalIsError ? "요청을 처리하지 못했어요." : "처리가 완료됐어요."}
-        confirmLabel="메인으로"
-        cancelLabel="닫기"
-        onConfirm={MainPageNavigate}
+        title="요청을 처리하지 못했어요."
+        confirmLabel="확인"
+        hideCancel
+        onConfirm={closeModal}
         onClose={closeModal}
       >
         {displayModalMessage}
@@ -466,7 +490,14 @@ export default function SearchPage() {
 
       {toast ? (
         <div className="ui-toast-stack" aria-live="polite">
-          <Toast tone={toast.tone}>{toast.message}</Toast>
+          <Toast
+            tone={toast.tone}
+            actionLabel={toast.actionLabel}
+            onAction={toast.actionTo ? () => navigate(toast.actionTo, { state: { from: "/search" } }) : undefined}
+            onClose={() => setToast(null)}
+          >
+            {toast.message}
+          </Toast>
         </div>
       ) : null}
     </AppShell>
