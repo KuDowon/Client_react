@@ -47,6 +47,7 @@ export default function BookListItem({
             <IconButton
               icon={book.liked ? "heart-filled" : "heart"}
               label={book.liked ? "관심도서 취소" : "관심도서 설정"}
+              selected={Boolean(book.liked)}
               onClick={() => onToggleFavorite(book.id)}
             />
           ) : null}
