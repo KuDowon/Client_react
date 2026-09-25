@@ -25,6 +25,8 @@ const cases = [
   { name: "book-data-390", path: "/BookPage/1", viewport: { width: 390, height: 844 }, expectedText: LONG_BOOK_TITLE, navigation: "bottom", mockBook: true },
   { name: "book-data-820", path: "/BookPage/1", viewport: { width: 820, height: 1180 }, expectedText: LONG_BOOK_TITLE, navigation: "bottom", mockBook: true },
   { name: "book-data-1024", path: "/BookPage/1", viewport: { width: 1024, height: 768 }, expectedText: LONG_BOOK_TITLE, navigation: "bottom", mockBook: true },
+  { name: "book-reserved-1024", path: "/BookPage/1", viewport: { width: 1024, height: 768 }, expectedText: LONG_BOOK_TITLE, navigation: "bottom", mockBook: true, bookStatus: "RESERVED", expectedBookAction: "예약중", expectedBookActionDisabled: true },
+  { name: "book-favorite-390", path: "/BookPage/1", viewport: { width: 390, height: 844 }, expectedText: LONG_BOOK_TITLE, navigation: "bottom", mockBook: true, seedAuth: true, favoriteToggle: true },
 
   { name: "my-data-390", path: "/MyPage", viewport: { width: 390, height: 844 }, expectedText: "테스트 사용자", navigation: "bottom", mockMyPage: true, expectedWithdrawal: true },
   { name: "my-data-820", path: "/MyPage", viewport: { width: 820, height: 1180 }, expectedText: "테스트 사용자", navigation: "bottom", mockMyPage: true, expectedWithdrawal: true },
@@ -34,6 +36,7 @@ const cases = [
   { name: "borrow-empty-820", path: "/CurrentBorrow", viewport: { width: 820, height: 1180 }, expectedText: "대출 중인 도서가 없어요.", navigation: "bottom" },
   { name: "reserve-empty-1024", path: "/CurrentReserve", viewport: { width: 1024, height: 768 }, expectedText: "현재 예약 중인 도서가 없어요.", navigation: "bottom" },
   { name: "overdue-empty-1366", path: "/CurrentOverdue", viewport: { width: 1366, height: 768 }, expectedText: "연체 중인 도서가 없어요.", navigation: "bottom" },
+  { name: "overdue-data-820", path: "/CurrentOverdue", viewport: { width: 820, height: 1180 }, expectedText: "5일 연체", navigation: "bottom", mockOverdue: true, seedAuth: true, expectedOverdueEndpoint: true },
   { name: "overdue-from-home-820", path: "/CurrentOverdue", viewport: { width: 820, height: 1180 }, expectedText: "연체 중인 도서가 없어요.", navigation: "bottom", entryFrom: "/", expectedBackTo: "/", expectedActiveNav: "홈" },
   { name: "overdue-from-my-820", path: "/CurrentOverdue", viewport: { width: 820, height: 1180 }, expectedText: "연체 중인 도서가 없어요.", navigation: "bottom", entryFrom: "/MyPage", expectedBackTo: "/MyPage", expectedActiveNav: "마이" },
   { name: "guide-1440", path: "/GuidePage", viewport: { width: 1440, height: 900 }, expectedText: "문중문고 이용안내", navigation: "bottom" },
@@ -42,7 +45,9 @@ const cases = [
   { name: "login-390", path: "/LoginPage", viewport: { width: 390, height: 844 }, expectedText: "문중문고의 대출·예약 서비스를 이용하려면 로그인해주세요." },
   { name: "signup-390", path: "/SignUp", viewport: { width: 390, height: 844 }, expectedText: "문중문고 이용을 위한 기본 정보를 입력해주세요." },
   { name: "find-id-390", path: "/FindId", viewport: { width: 390, height: 844 }, expectedText: "가입할 때 입력한 이름과 전화번호를 확인해주세요." },
-  { name: "reset-password-390", path: "/ResetPassword", viewport: { width: 390, height: 844 }, expectedText: "현재 비밀번호 변경 기능은 관리자 확인을 통해 진행돼요." },
+  { name: "reset-password-390", path: "/ResetPassword", viewport: { width: 390, height: 844 }, expectedText: "비밀번호 변경은 관리자 확인 후 진행하고 있어요.", expectedKakaoInquiry: true },
+  { name: "my-reviews-patch-390", path: "/MyReviewsPage", viewport: { width: 390, height: 844 }, expectedText: "수정 전 리뷰", navigation: "bottom", mockReviewsPage: true, seedAuth: true, reviewPatch: true },
+  { name: "not-found-390", path: "/this-route-does-not-exist", viewport: { width: 390, height: 844 }, expectedText: "페이지를 찾을 수 없어요.", navigation: "bottom" },
 ];
 
 const mockSearchBooks = [
@@ -82,6 +87,18 @@ const mockSearchBooks = [
     popularity: 70,
     location: "문중문고 테스트 서가 A-03",
   },
+  {
+    id: 4,
+    title: "예약 중인 테스트 도서",
+    author: "네 번째 저자",
+    publisher: "테스트 출판사",
+    book_code: "MJ123459",
+    image_url: "",
+    is_liked: false,
+    book_status: "RESERVED",
+    popularity: 60,
+    location: "문중문고 테스트 서가 A-04",
+  },
 ];
 
 const mockBookDetail = {
@@ -92,13 +109,13 @@ const mockBookDetail = {
   edition: "제2판",
   physical: "320 p. ; 23 cm",
   call_number: "020.123-테57ㅂ",
-  status: "AVAILABLE",
+  book_status: "AVAILABLE",
   series: "문중문고 반응형 QA 시리즈",
   details: "태블릿과 노트북에서도 상세 정보가 읽기 좋은 폭과 간격으로 표시되는지 확인하기 위한 설명입니다.",
   notes: "QA mock data",
   image_url: "",
   book_code: "MJ123456",
-  liked: false,
+  is_liked: false,
 };
 
 const mockReviews = [
@@ -108,6 +125,37 @@ const mockReviews = [
     created_at: "2026-09-24T12:00:00Z",
     content: "긴 화면에서도 리뷰 영역의 읽기 폭과 간격이 유지되는지 확인합니다.",
   },
+];
+
+const mockMyReviews = [
+  {
+    id: 44,
+    book: 1,
+    book_title: "리뷰 수정 테스트 도서",
+    user_username: "qa_user",
+    content: "수정 전 리뷰",
+    created_at: "2026-09-24T12:00:00Z",
+  },
+];
+
+const mockOverdueRentals = [
+  {
+    id: 71,
+    rental_date: "2026-09-01",
+    due_date: "2026-09-20",
+    overdue_days: 5,
+    is_overdue: true,
+    book: {
+      id: 3,
+      book_code: "MJ000071",
+      title: "연체 API 테스트 도서",
+      author: "테스트 저자",
+      publisher: "테스트 출판사",
+      book_status: "RENTED",
+      location: "A-07",
+      image_url: ""
+    }
+  }
 ];
 
 const mockMyPage = {
@@ -150,6 +198,7 @@ try {
   for (const testCase of cases) {
     const page = await browser.newPage();
     const runtimeErrors = [];
+    const observedRequests = [];
 
     page.on("pageerror", (error) => runtimeErrors.push(`pageerror: ${error.message}`));
     page.on("console", (message) => {
@@ -161,10 +210,11 @@ try {
       }
     });
 
-    if (testCase.mockSearch || testCase.mockBook || testCase.mockMyPage) {
+    if (testCase.mockSearch || testCase.mockBook || testCase.mockMyPage || testCase.mockOverdue || testCase.mockReviewsPage) {
       await page.setRequestInterception(true);
       page.on("request", async (request) => {
         const url = request.url();
+        observedRequests.push({ url, method: request.method() });
 
         if (testCase.mockSearch && url.includes("/books/") && url.includes("search=qa")) {
           await jsonResponse(request, mockSearchBooks);
@@ -172,7 +222,16 @@ try {
         }
 
         if (testCase.mockBook && url.endsWith("/books/1/")) {
-          await jsonResponse(request, mockBookDetail);
+          await jsonResponse(request, {
+            ...mockBookDetail,
+            book_status: testCase.bookStatus || mockBookDetail.book_status,
+            is_liked: false,
+          });
+          return;
+        }
+
+        if (testCase.mockBook && request.method() === "POST" && url.endsWith("/books/1/like/")) {
+          await jsonResponse(request, { message: "좋아요 등록됨" });
           return;
         }
 
@@ -183,6 +242,22 @@ try {
 
         if (testCase.mockMyPage && url.includes("/users/mypage/")) {
           await jsonResponse(request, mockMyPage);
+          return;
+        }
+
+        if (testCase.mockOverdue && url.endsWith("/rentals/overdue/")) {
+          await jsonResponse(request, mockOverdueRentals);
+          return;
+        }
+
+        if (testCase.mockReviewsPage && request.method() === "GET" && /\/reviews\/$/.test(new URL(url).pathname)) {
+          await jsonResponse(request, mockMyReviews);
+          return;
+        }
+
+        if (testCase.mockReviewsPage && request.method() === "PATCH" && url.endsWith("/reviews/44/")) {
+          const body = JSON.parse(request.postData() || "{}");
+          await jsonResponse(request, { id: 44, content: body.content || "" });
           return;
         }
 
@@ -205,7 +280,7 @@ try {
           window.localStorage.setItem("reserveCount", "1");
           window.localStorage.setItem("overdueCount", "1");
         }
-      }, testCase.entryFrom || null, Boolean(testCase.mockMyPage));
+      }, testCase.entryFrom || null, Boolean(testCase.mockMyPage || testCase.seedAuth || testCase.mockOverdue || testCase.mockReviewsPage));
 
     const response = await page.goto(`http://127.0.0.1:4173${testCase.path}`, {
       waitUntil: "domcontentloaded",
@@ -270,6 +345,79 @@ try {
       } catch (error) {
         failures.push(`${testCase.name}: filter interaction failed: ${error.message}`);
       }
+    }
+
+    if (testCase.mockSearch) {
+      const reservedState = await page.evaluate(() => {
+        const title = [...document.querySelectorAll(".book-list-item__title")].find((node) => node.textContent.includes("예약 중인 테스트 도서"));
+        const item = title?.closest(".book-list-item");
+        const button = item?.querySelector(".ui-button");
+        return button ? { text: button.textContent.trim(), disabled: button.disabled } : null;
+      });
+      if (!reservedState || reservedState.text !== "예약중" || !reservedState.disabled) {
+        failures.push(`${testCase.name}: RESERVED search result must show a disabled 예약중 action`);
+      }
+    }
+
+    if (testCase.expectedBookAction) {
+      const action = await page.evaluate(() => {
+        const button = document.querySelector(".book-detail__actions .ui-button");
+        return button ? { text: button.textContent.trim(), disabled: button.disabled } : null;
+      });
+      if (!action || action.text !== testCase.expectedBookAction || Boolean(action.disabled) !== Boolean(testCase.expectedBookActionDisabled)) {
+        failures.push(`${testCase.name}: book action state mismatch`);
+      }
+    }
+
+    if (testCase.favoriteToggle) {
+      try {
+        await page.click('button[aria-label="관심도서 설정"]');
+        await page.waitForFunction(() => document.body.innerText.includes("관심도서에 저장했어요."), { timeout: 3000 });
+        const favorite = await page.evaluate(() => {
+          const button = document.querySelector('button[aria-label="관심도서 취소"]');
+          return button ? {
+            pressed: button.getAttribute("aria-pressed"),
+            selectedClass: button.classList.contains("ui-icon-button--selected")
+          } : null;
+        });
+        if (!favorite || favorite.pressed !== "true" || !favorite.selectedClass) {
+          failures.push(`${testCase.name}: favorite selected state is not exposed after API success`);
+        }
+      } catch (error) {
+        failures.push(`${testCase.name}: favorite toggle failed: ${error.message}`);
+      }
+    }
+
+    if (testCase.expectedOverdueEndpoint) {
+      const used = observedRequests.some((entry) => entry.method === "GET" && entry.url.endsWith("/rentals/overdue/"));
+      if (!used) failures.push(`${testCase.name}: did not call GET /rentals/overdue/`);
+    }
+
+    if (testCase.reviewPatch) {
+      try {
+        await page.click("button.ui-button--tertiary");
+        await page.waitForSelector(".review-page__editor textarea", { visible: true, timeout: 3000 });
+        await page.evaluate(() => {
+          const textarea = document.querySelector(".review-page__editor textarea");
+          textarea.value = "서버에 저장되는 수정 리뷰";
+          textarea.dispatchEvent(new Event("input", { bubbles: true }));
+        });
+        await page.click(".ui-dialog__actions .ui-button--primary");
+        await page.waitForFunction(() => document.body.innerText.includes("리뷰를 수정했어요."), { timeout: 3000 });
+        const patchUsed = observedRequests.some((entry) => entry.method === "PATCH" && entry.url.endsWith("/reviews/44/"));
+        const updatedText = await page.evaluate(() => document.body.innerText.includes("서버에 저장되는 수정 리뷰"));
+        if (!patchUsed || !updatedText) failures.push(`${testCase.name}: review PATCH did not persist in UI`);
+      } catch (error) {
+        failures.push(`${testCase.name}: review edit interaction failed: ${error.message}`);
+      }
+    }
+
+    if (testCase.expectedKakaoInquiry) {
+      const inquiry = await page.evaluate(() => {
+        const anchor = [...document.querySelectorAll("a")].find((node) => node.textContent.includes("카카오톡으로 문의하기"));
+        return anchor?.href || null;
+      });
+      if (!inquiry?.includes("pf.kakao.com")) failures.push(`${testCase.name}: password recovery does not link to Kakao support`);
     }
 
     const metrics = await page.evaluate(() => {
