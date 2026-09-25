@@ -34,5 +34,7 @@ export function useNavigationMode() {
     return () => media.removeEventListener?.("change", handleChange);
   }, []);
 
-  return validParam || responsiveMode;
+  if (validParam === "bottom") return "bottom";
+  if (validParam === "top") return responsiveMode === "top" ? "top" : "bottom";
+  return responsiveMode;
 }
