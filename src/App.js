@@ -11,6 +11,7 @@ import MainPage from './Pages/MainPage.jsx';
 import NoticePage from './Pages/NoticePage.jsx';
 import CurationPage from './Pages/CurationPage.jsx';
 import GuidePage from './Pages/GuidePage.jsx';
+import NotFoundPage from './Pages/NotFoundPage.jsx';
 /*Current*/
 import CurrentBorrow from './Pages/CurrentBorrow.jsx';
 import CurrentOverdue from './Pages/CurrentOverdue.jsx';
@@ -74,6 +75,9 @@ function App() {
         <Route path="/LoanChoice" element={<LoanChoice />} />
         <Route path="/LoanLoan" element={<LoanLoan />} />
         <Route path="/LoanReturn" element={<LoanReturn />} />
+
+        {/* 잘못된 주소 */}
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </div>
   );
