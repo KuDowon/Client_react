@@ -49,7 +49,7 @@ function LoadingRows(){
 
 export default function CurrentReserve(){
   const {state}=useLocation();
-  const backTo=state?.from==="/MyPage"?"/MyPage":"/";
+  const backTo=state?.from||"/";
   const [reservations,setReservations]=useState([]);
   const [loading,setLoading]=useState(true);
   const [error,setError]=useState(null);
