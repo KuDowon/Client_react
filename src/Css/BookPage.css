@@ -14,6 +14,7 @@
 .book-detail__key-meta dt,.book-detail__details dt{font-size:12px;line-height:18px;font-weight:600;color:var(--color-text-tertiary)}
 .book-detail__key-meta dd,.book-detail__details dd{margin:0;font-size:14px;line-height:21px;color:var(--color-text-primary);word-break:break-word}
 .book-detail__actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.book-detail__action-helper{margin-top:-12px;font-size:13px;line-height:20px;color:var(--color-text-secondary);word-break:keep-all}
 .book-detail__section{display:flex;flex-direction:column;gap:16px;padding-top:32px;border-top:1px solid var(--color-border-subtle)}
 .book-detail__details{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 32px}
 .book-detail__review-editor{padding:16px;border:1px solid var(--color-border-subtle);border-radius:12px;background:var(--color-gray-50);display:flex;flex-direction:column;gap:8px}
