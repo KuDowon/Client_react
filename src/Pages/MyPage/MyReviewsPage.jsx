@@ -121,7 +121,12 @@ export default function MyReviewsPage(){
           {loading?(
             <div className="mypage-v2__loading"><Skeleton width="100%" height={96}/><Skeleton width="100%" height={96}/></div>
           ):error?(
-            <EmptyState icon="alert" title="리뷰를 불러오지 못했어요." description={error}/>
+            <EmptyState
+              icon="alert"
+              title="리뷰를 불러오지 못했어요."
+              description={error}
+              action={<Button variant="secondary" onClick={()=>{setLoading(true);setError(null);loadReviews();}}>다시 시도</Button>}
+            />
           ):reviews.length===0?(
             <EmptyState icon="edit" title="작성한 리뷰가 없어요." description="도서 상세 페이지에서 읽은 책의 리뷰를 남겨보세요."/>
           ):(
