@@ -159,7 +159,7 @@ export default function BookPage() {
 
         if (/^MJ\d{6}$/i.test(raw)) {
           const code = raw.toUpperCase();
-          const data = await fetchJSON(`/books/?book_code=${encodeURIComponent(code)}`, {
+          const data = await fetchJSON(`/books/?search=${encodeURIComponent(code)}`, {
             auth: false,
             timeoutMs: 8000,
           });
