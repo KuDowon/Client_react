@@ -100,13 +100,13 @@ async function toggleLikeAPI(bookId) {
 function getStatusInfo(status) {
   switch (status) {
     case "AVAILABLE":
-      return { label: "대출가능", tone: "success", actionLabel: "대출신청", disabled: false };
+      return { label: "대출 가능", tone: "success", actionLabel: "대출하기", disabled: false };
     case "RENTED":
-      return { label: "대출중", tone: "neutral", actionLabel: "예약하기", disabled: false };
+      return { label: "대출 중", tone: "neutral", actionLabel: "예약하기", disabled: false };
     case "RESERVED":
-      return { label: "예약중", tone: "neutral", actionLabel: "예약중", disabled: true };
+      return { label: "예약 중", tone: "neutral", actionLabel: "예약 중", disabled: true };
     case "UNAVAILABLE":
-      return { label: "대출불가", tone: "neutral", actionLabel: "대출불가", disabled: true };
+      return { label: "대출 불가", tone: "neutral", actionLabel: "대출 불가", disabled: true };
     default:
       return { label: "상태 확인 필요", tone: "neutral", actionLabel: "이용 불가", disabled: true };
   }
