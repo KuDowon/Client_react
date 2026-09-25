@@ -7,6 +7,7 @@ import AppHeader from "../Components/layout/AppHeader";
 import AppShell from "../Components/layout/AppShell";
 import PageContainer from "../Components/layout/PageContainer";
 import BookListItem from "../Components/library/BookListItem";
+import Button from "../Components/ui/Button";
 import Dialog from "../Components/ui/Dialog";
 import EmptyState from "../Components/ui/EmptyState";
 import SectionHeader from "../Components/ui/SectionHeader";
@@ -51,6 +52,7 @@ export default function CurrentBorrow(){
   const [error,setError]=useState(null);
   const [modalMessage,setModalMessage]=useState(null);
   const [confirmModalState,setConfirmModalState]=useState({isOpen:false,rentalId:null});
+  const [returning,setReturning]=useState(false);
 
   const refreshRentalData=useCallback(async()=>{
     setLoading(true);setError(null);
@@ -59,20 +61,27 @@ export default function CurrentBorrow(){
       const current=data.filter((item)=>!item.is_overdue&&!item.is_returned);
       setRentals(current);
       localStorage.setItem("borrowCount",current.length.toString());
-    }catch(err){setError(err.message);}finally{setLoading(false);}
+    }catch(err){console.error("현재 대출 도서 정보 불러오기 실패:",err);setError("대출 정보를 불러오지 못했어요. 잠시 후 다시 시도해주세요.");}finally{setLoading(false);}
   },[]);
 
   useEffect(()=>{refreshRentalData();},[refreshRentalData]);
 
   const executeReturn=async()=>{
     const rentalId=confirmModalState.rentalId;
-    setConfirmModalState({isOpen:false,rentalId:null});
-    if(!rentalId)return;
+    if(!rentalId||returning)return;
+    setReturning(true);
     try{
       const message=await returnBookAPI(rentalId);
+      setConfirmModalState({isOpen:false,rentalId:null});
       setModalMessage(message);
-      refreshRentalData();
-    }catch(err){setModalMessage(err.message||"반납 처리 중 알 수 없는 오류가 발생했습니다.");}
+      await refreshRentalData();
+    }catch(err){
+      console.error("반납 처리 실패:",err);
+      setConfirmModalState({isOpen:false,rentalId:null});
+      setModalMessage("반납을 완료하지 못했어요. 잠시 후 다시 시도해주세요.");
+    }finally{
+      setReturning(false);
+    }
   };
 
   return (
@@ -85,7 +94,7 @@ export default function CurrentBorrow(){
             <p className="status-page__description">반납 예정일과 예약 여부를 확인할 수 있어요.</p>
           </div>
           {loading?<LoadingRows/>:null}
-          {error?<EmptyState icon="alert" title="대출 정보를 불러오지 못했어요." description={error}/>:null}
+          {error?<EmptyState icon="alert" title="대출 정보를 불러오지 못했어요." description={error} action={<Button variant="secondary" onClick={refreshRentalData}>다시 시도</Button>}/>:null}
           {!loading&&!error&&rentals.length===0?<EmptyState icon="book" title="대출 중인 도서가 없어요." description="새로운 도서를 검색해보세요."/>:null}
           {!loading&&!error&&rentals.length>0?(
             <div className="status-page__list">
@@ -101,7 +110,7 @@ export default function CurrentBorrow(){
         </section>
       </PageContainer>
       <Footer/>
-      <Dialog open={confirmModalState.isOpen} title="이 도서를 반납할까요?" confirmLabel="반납하기" cancelLabel="취소" onConfirm={executeReturn} onClose={()=>setConfirmModalState({isOpen:false,rentalId:null})}>반납 후에는 다시 대출해야 이용할 수 있어요.</Dialog>
+      <Dialog open={confirmModalState.isOpen} title="이 도서를 반납할까요?" confirmLabel="반납하기" cancelLabel="취소" confirmLoading={returning} onConfirm={executeReturn} onClose={()=>{if(!returning)setConfirmModalState({isOpen:false,rentalId:null});}}>반납 후에는 다시 대출해야 이용할 수 있어요.</Dialog>
       <Dialog open={Boolean(modalMessage)} title="반납 처리 결과" confirmLabel="확인" hideCancel onConfirm={()=>setModalMessage(null)} onClose={()=>setModalMessage(null)}>{modalMessage}</Dialog>
     </AppShell>
   );
