@@ -1,7 +1,6 @@
-import { useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 
-const STORAGE_KEY = "mungoNavigationMode";
 export const WIDE_NAV_BREAKPOINT = 960;
 
 export function getPrimaryNavActive(pathname, state, key) {
@@ -12,27 +11,28 @@ export function getPrimaryNavActive(pathname, state, key) {
 
   if (key === "home") return pathname === "/";
   if (key === "loan") return pathname.startsWith("/Loan");
-  return pathname.startsWith("/My") || pathname.startsWith("/EditProfile");
+  return pathname.startsWith("/My") || pathname.startsWith("/EditProfile") || pathname.startsWith("/Interest");
 }
+
+const getResponsiveMode = () => {
+  if (typeof window === "undefined") return "bottom";
+  return window.matchMedia(`(min-width: ${WIDE_NAV_BREAKPOINT}px)`).matches ? "top" : "bottom";
+};
 
 export function useNavigationMode() {
   const { search } = useLocation();
-  const param = new URLSearchParams(search).get("navMode");
+  const param = useMemo(() => new URLSearchParams(search).get("navMode"), [search]);
   const validParam = param === "top" || param === "bottom" ? param : null;
-
-  let stored = "bottom";
-  if (typeof window !== "undefined") {
-    const saved = window.sessionStorage.getItem(STORAGE_KEY);
-    if (saved === "top" || saved === "bottom") stored = saved;
-  }
-
-  const mode = validParam || stored;
+  const [responsiveMode, setResponsiveMode] = useState(getResponsiveMode);
 
   useEffect(() => {
-    if (validParam && typeof window !== "undefined") {
-      window.sessionStorage.setItem(STORAGE_KEY, validParam);
-    }
-  }, [validParam]);
+    if (typeof window === "undefined") return undefined;
+    const media = window.matchMedia(`(min-width: ${WIDE_NAV_BREAKPOINT}px)`);
+    const handleChange = () => setResponsiveMode(media.matches ? "top" : "bottom");
+    handleChange();
+    media.addEventListener?.("change", handleChange);
+    return () => media.removeEventListener?.("change", handleChange);
+  }, []);
 
-  return mode;
+  return validParam || responsiveMode;
 }
