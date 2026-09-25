@@ -5,7 +5,7 @@ export default function IconButton({
   icon,
   label,
   variant = "ghost",
-  selected = false,
+  selected = null,
   className = "",
   ...props
 }) {
@@ -15,11 +15,11 @@ export default function IconButton({
       className={[
         "ui-icon-button",
         variant === "outline" ? "ui-icon-button--outline" : "",
-        selected ? "ui-icon-button--selected" : "",
+        selected === true ? "ui-icon-button--selected" : "",
         className
       ].filter(Boolean).join(" ")}
       aria-label={label}
-      aria-pressed={selected || undefined}
+      aria-pressed={selected === null ? undefined : Boolean(selected)}
       {...props}
     >
       <Icon name={icon} />
