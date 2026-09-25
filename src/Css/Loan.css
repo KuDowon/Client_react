@@ -10,5 +10,9 @@
 .loan-choice__copy strong{font-size:18px;line-height:27px;font-weight:600}
 .loan-choice__copy small{font-size:13px;line-height:20px;color:var(--color-text-secondary)}
 .loan-v2-form{width:100%;max-width:480px;display:flex;flex-direction:column;gap:16px}
-.loan-v2-form__caption{display:flex;flex-direction:column;gap:4px;padding:16px;border-radius:var(--radius-sm);background:var(--color-gray-50);font-size:12px;line-height:18px;color:var(--color-text-secondary);text-align:left}
+.loan-v2-form__caption{display:flex;flex-direction:column;gap:10px;padding:16px;border:1px solid var(--color-border-subtle);border-radius:var(--radius-md);background:var(--color-gray-50);text-align:left}
+.loan-v2-form__caption-title{font-size:13px;line-height:20px;font-weight:600;color:var(--color-text-primary)}
+.loan-v2-form__caption-list{display:flex;flex-direction:column;gap:6px;font-size:12px;line-height:18px;color:var(--color-text-secondary)}
+.loan-v2-form__caption-list p{position:relative;padding-left:12px;word-break:keep-all}
+.loan-v2-form__caption-list p::before{content:"";position:absolute;left:1px;top:7px;width:4px;height:4px;border-radius:50%;background:var(--color-gray-400)}
 @media (min-width:600px){.loan-choice,.loan-action{padding-top:40px}.loan-choice__grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
