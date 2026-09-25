@@ -502,7 +502,7 @@ export default function SearchPage() {
           <Toast
             tone={toast.tone}
             actionLabel={toast.actionLabel}
-            onAction={toast.actionTo ? () => navigate(toast.actionTo, { state: { from: "/search" } }) : undefined}
+            onAction={toast.actionTo ? () => navigate(toast.actionTo, { state: { from: location.pathname + location.search } }) : undefined}
             onClose={() => setToast(null)}
           >
             {toast.message}
