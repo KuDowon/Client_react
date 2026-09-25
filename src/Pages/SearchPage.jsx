@@ -7,6 +7,7 @@ import SearchBar from "../Components/SearchBar";
 import { submitLoanRequest } from "../Api/loan";
 import AppShell from "../Components/layout/AppShell";
 import AppHeader from "../Components/layout/AppHeader";
+import Button from "../Components/ui/Button";
 import PageContainer from "../Components/layout/PageContainer";
 import BookListItem from "../Components/library/BookListItem";
 import Dialog from "../Components/ui/Dialog";
@@ -135,6 +136,7 @@ export default function SearchPage() {
   const [sortMode, setSortMode] = useState("오름차순");
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState(null);
+  const [retryKey, setRetryKey] = useState(0);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
@@ -174,7 +176,7 @@ export default function SearchPage() {
     return () => {
       alive = false;
     };
-  }, [q]);
+  }, [q, retryKey]);
 
   const executeLoan = async () => {
     const book = confirmLoanState.book;
@@ -375,6 +377,7 @@ export default function SearchPage() {
                 icon="alert"
                 title="검색 결과를 불러오지 못했어요."
                 description={String(err.message || err)}
+                action={<Button variant="secondary" onClick={() => setRetryKey((value) => value + 1)}>다시 시도</Button>}
               />
             ) : null}
 
