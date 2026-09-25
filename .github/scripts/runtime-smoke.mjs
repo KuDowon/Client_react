@@ -230,7 +230,7 @@ try {
           return;
         }
 
-        if (testCase.mockBook && request.method() === "POST" && url.endsWith("/books/1/like/")) {
+        if (testCase.mockBook && url.endsWith("/books/1/like/")) {
           await jsonResponse(request, { message: "좋아요 등록됨" });
           return;
         }
@@ -250,14 +250,14 @@ try {
           return;
         }
 
-        if (testCase.mockReviewsPage && request.method() === "GET" && /\/reviews\/$/.test(new URL(url).pathname)) {
+        if (testCase.mockReviewsPage && /\/reviews\/$/.test(new URL(url).pathname)) {
           await jsonResponse(request, mockMyReviews);
           return;
         }
 
-        if (testCase.mockReviewsPage && request.method() === "PATCH" && url.endsWith("/reviews/44/")) {
-          const body = JSON.parse(request.postData() || "{}");
-          await jsonResponse(request, { id: 44, content: body.content || "" });
+        if (testCase.mockReviewsPage && url.endsWith("/reviews/44/")) {
+          const body = request.method() === "PATCH" ? JSON.parse(request.postData() || "{}") : {};
+          await jsonResponse(request, { id: 44, content: body.content || "수정 전 리뷰" });
           return;
         }
 
