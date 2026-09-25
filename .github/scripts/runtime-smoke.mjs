@@ -4,10 +4,10 @@ import puppeteer from "puppeteer";
 const LONG_BOOK_TITLE = "반응형 테스트를 위한 아주 긴 도서 제목이 두 줄 이상이어도 레이아웃이 무너지지 않아야 합니다";
 
 const cases = [
-  { name: "home-390", path: "/", viewport: { width: 390, height: 844 }, expectedText: "필요한 책을 쉽고 빠르게 찾아보세요.", navigation: "bottom", expectedLockedSummary: true },
+  { name: "home-390", path: "/", viewport: { width: 390, height: 844 }, expectedText: "필요한 책을 쉽고 빠르게 찾아보세요.", navigation: "bottom", expectedLockedSummary: true, protectedMy: true },
   { name: "home-768", path: "/", viewport: { width: 768, height: 1024 }, expectedText: "필요한 책을 쉽고 빠르게 찾아보세요.", navigation: "bottom" },
   { name: "home-820", path: "/", viewport: { width: 820, height: 1180 }, expectedText: "필요한 책을 쉽고 빠르게 찾아보세요.", navigation: "bottom" },
-  { name: "home-1024", path: "/", viewport: { width: 1024, height: 768 }, expectedText: "필요한 책을 쉽고 빠르게 찾아보세요.", navigation: "top" },
+  { name: "home-1024", path: "/", viewport: { width: 1024, height: 768 }, expectedText: "필요한 책을 쉽고 빠르게 찾아보세요.", navigation: "top", protectedMy: true },
   { name: "home-1200", path: "/", viewport: { width: 1200, height: 900 }, expectedText: "필요한 책을 쉽고 빠르게 찾아보세요.", navigation: "top" },
   { name: "home-1366", path: "/", viewport: { width: 1366, height: 768 }, expectedText: "필요한 책을 쉽고 빠르게 찾아보세요.", navigation: "top" },
   { name: "home-1440", path: "/", viewport: { width: 1440, height: 900 }, expectedText: "필요한 책을 쉽고 빠르게 찾아보세요.", navigation: "top" },
@@ -551,6 +551,58 @@ try {
       }
       if (metrics.scrollWidth > metrics.innerWidth + 1) {
         failures.push(`${testCase.name}: top-navigation mode creates horizontal overflow`);
+      }
+    }
+
+    if (testCase.protectedMy) {
+      try {
+        if (testCase.navigation === "top") {
+          await page.evaluate(() => {
+            const button = [...document.querySelectorAll(".app-top-nav__item")]
+              .find((node) => node.textContent.trim() === "마이");
+            button?.click();
+          });
+        } else {
+          await page.evaluate(() => {
+            const button = [...document.querySelectorAll(".app-bottom-nav__item")]
+              .find((node) => node.textContent.trim() === "마이");
+            button?.click();
+          });
+        }
+
+        await page.waitForFunction(
+          () => document.body.innerText.includes("로그인이 필요한 서비스예요") &&
+                document.body.innerText.includes("마이를 이용하려면 먼저 로그인해주세요."),
+          { timeout: 3000 }
+        );
+
+        const dialogState = await page.evaluate(() => {
+          const dialog = document.querySelector('[role="dialog"]');
+          const primary = dialog?.querySelector(".ui-dialog__actions .ui-button--primary");
+          const cancel = dialog?.querySelector(".ui-dialog__actions .ui-button--secondary");
+          return {
+            exists: Boolean(dialog),
+            loginLabel: primary?.textContent.trim() || null,
+            closeLabel: cancel?.textContent.trim() || null,
+          };
+        });
+
+        if (!dialogState.exists || dialogState.loginLabel !== "로그인" || dialogState.closeLabel !== "닫기") {
+          failures.push(`${testCase.name}: My login prompt actions are incorrect`);
+        }
+
+        await page.click(".ui-dialog__actions .ui-button--primary");
+        await page.waitForFunction(
+          () => window.location.pathname === "/LoginPage",
+          { timeout: 3000 }
+        );
+
+        const returnTarget = await page.evaluate(() => window.history.state?.usr?.returnTo || null);
+        if (returnTarget !== "/MyPage") {
+          failures.push(`${testCase.name}: My login flow did not preserve /MyPage return target`);
+        }
+      } catch (error) {
+        failures.push(`${testCase.name}: protected My interaction failed: ${error.message}`);
       }
     }
 
