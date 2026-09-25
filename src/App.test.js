@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import Button from "./Components/ui/Button";
 import FilterSelect from "./Components/ui/FilterSelect";
+import IconButton from "./Components/ui/IconButton";
 import StatusBadge from "./Components/ui/StatusBadge";
 import TextField from "./Components/ui/TextField";
 
@@ -62,4 +63,12 @@ test("disables filter interaction when disabled", () => {
     />
   );
   expect(screen.getByRole("button", { name: /정렬 제목순/ }).disabled).toBe(true);
+});
+
+
+test("renders selected favorite icon button state", () => {
+  render(<IconButton icon="heart-filled" label="관심도서 취소" selected />);
+  const button = screen.getByRole("button", { name: "관심도서 취소" });
+  expect(button.getAttribute("aria-pressed")).toBe("true");
+  expect(button.className.includes("ui-icon-button--selected")).toBe(true);
 });
