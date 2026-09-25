@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import "../../Css/MyPage.css";
+import "../../Css/StatusPages.css";
 
 import Footer from "../../Components/Footer";
 import AppHeader from "../../Components/layout/AppHeader";
@@ -123,7 +124,7 @@ export default function Interest() {
 
   useEffect(() => {
     if (!toast) return undefined;
-    const timer = window.setTimeout(() => setToast(null), 2400);
+    const timer = window.setTimeout(() => setToast(null), 3000);
     return () => window.clearTimeout(timer);
   }, [toast]);
 
