@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { getPrimaryNavActive } from "./navigationMode";
 
 export default function TopNavigation() {
-  const { pathname, state } = useLocation();
+  const { pathname, search, state } = useLocation();
   const navigate = useNavigate();
 
   const itemProps = (key) => ({
@@ -12,7 +12,16 @@ export default function TopNavigation() {
   });
 
   const handleLoanReturn = () => {
-    navigate(localStorage.getItem("accessToken") ? "/LoanChoice" : "/LoginPage");
+    if (localStorage.getItem("accessToken")) {
+      navigate("/LoanChoice");
+      return;
+    }
+    navigate("/LoginPage", {
+      state: {
+        returnTo: "/LoanChoice",
+        from: pathname + search
+      }
+    });
   };
 
   return (
