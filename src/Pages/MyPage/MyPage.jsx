@@ -96,6 +96,7 @@ export default function MyPage(){
               <section className="mypage-v2__section">
                 <SectionHeader title="내 활동"/>
                 <div className="mypage-v2__menu">
+                  <button type="button" onClick={()=>navigate("/Interest")}><span><Icon name="heart"/>관심도서</span><Icon name="chevron-right"/></button>
                   <button type="button" onClick={()=>navigate("/MyReviewsPage")}><span><Icon name="edit"/>내가 쓴 리뷰</span><Icon name="chevron-right"/></button>
                   <a href="https://forms.gle/bM5gdDtrqMD6v3kj9" target="_blank" rel="noopener noreferrer"><span><Icon name="book"/>희망도서 신청</span><Icon name="chevron-right"/></a>
                   <a href="http://pf.kakao.com/_pHxbDn" target="_blank" rel="noopener noreferrer"><span><Icon name="info"/>오류 문의</span><Icon name="chevron-right"/></a>
