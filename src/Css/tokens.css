@@ -13,6 +13,7 @@
   --color-action-primary-bg:var(--color-blue-600);--color-action-primary-hover:var(--color-blue-700);--color-action-primary-pressed:var(--color-blue-800);--color-action-primary-text:#fff;
   --color-action-secondary-bg:#fff;--color-action-secondary-text:var(--color-gray-800);--color-action-secondary-border:var(--color-gray-300);
   --color-action-danger-bg:#fff;--color-action-danger-hover:#fff8f8;--color-action-danger-pressed:#fceff0;--color-action-danger-text:#9d4a52;--color-action-danger-text-hover:#873d45;--color-action-danger-text-pressed:#72343b;--color-action-danger-border:var(--color-gray-300);--color-action-danger-border-hover:#e8cbce;--color-action-danger-border-pressed:#d6a6aa;
+  --color-favorite-bg:var(--color-yellow-50);--color-favorite-fill:var(--color-yellow-400);--color-favorite-fg:var(--color-yellow-700);--color-favorite-border:var(--color-yellow-300);
   --color-disabled-bg:var(--color-gray-200);--color-disabled-text:var(--color-gray-500);--color-navigation-active:var(--color-blue-600);--color-navigation-inactive:var(--color-gray-600);
   --space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:20px;--space-6:24px;--space-8:32px;--space-10:40px;--space-12:48px;--space-16:64px;
   --radius-xs:4px;--radius-sm:8px;--radius-md:12px;--radius-lg:16px;--radius-full:999px;
