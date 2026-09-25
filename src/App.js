@@ -30,6 +30,7 @@ import BookPage from './Pages/BookPage.jsx';
 /* MyPage */
 import MyPage from './Pages/MyPage/MyPage.jsx';
 import MyReviewsPage from './Pages/MyPage/MyReviewsPage.jsx';
+import Interest from './Pages/MyPage/Interest.jsx';
 import EditProfilePage from './Pages/MyPage/EditProfilePage.jsx';
 
 /* Loan */
@@ -70,6 +71,7 @@ function App() {
         <Route path="/MyPage" element={<MyPage />} />
         <Route path="/EditProfilePage" element={<EditProfilePage />} />
         <Route path="/MyReviewsPage" element={<MyReviewsPage />} />
+        <Route path="/Interest" element={<Interest />} />
 
         {/* 대출/반납 */}
         <Route path="/LoanChoice" element={<LoanChoice />} />
