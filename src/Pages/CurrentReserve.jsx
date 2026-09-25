@@ -19,11 +19,9 @@ const authHeaders=()=>{const access=localStorage.getItem("accessToken");return {
 const fetchReservations=async()=>{
   const token=localStorage.getItem("accessToken");
   if(!token)return [];
-  try{
-    const response=await fetch(`${API_BASE_URL}/reservations/`,{headers:authHeaders()});
-    if(!response.ok)throw new Error(`API 오류: ${response.status}`);
-    return await response.json();
-  }catch(error){console.error("현재 예약 도서 정보 불러오기 실패:",error);return [];}
+  const response=await fetch(`${API_BASE_URL}/reservations/`,{headers:authHeaders()});
+  if(!response.ok)throw new Error(`API 오류: ${response.status}`);
+  return await response.json();
 };
 
 const cancelReservationAPI=async(reservationId)=>{
