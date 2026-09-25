@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import BottomNavigation from "./layout/BottomNavigation";
 import Dialog from "./ui/Dialog";
 
@@ -7,6 +7,7 @@ const isLoggedIn = () => Boolean(localStorage.getItem("accessToken"));
 
 function Footer() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleLoanReturn = () => {
@@ -19,7 +20,12 @@ function Footer() {
 
   const handleLoginNavigate = () => {
     setIsModalOpen(false);
-    navigate("/LoginPage");
+    navigate("/LoginPage", {
+      state: {
+        returnTo: "/LoanChoice",
+        from: location.pathname + location.search
+      }
+    });
   };
 
   return (
