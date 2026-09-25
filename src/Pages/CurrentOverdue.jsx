@@ -14,14 +14,15 @@ import printnull from "../Images/printnull.png";
 
 const API_BASE_URL=process.env.REACT_APP_API_BASE_URL;
 
-const fetchCurrentRentals=async()=>{
+const fetchOverdueRentals=async()=>{
   const token=localStorage.getItem("accessToken");
   if(!token)return [];
   try{
-    const response=await fetch(`${API_BASE_URL}/rentals/current/`,{headers:{"Content-Type":"application/json",Authorization:`Bearer ${token}`}});
+    const response=await fetch(`${API_BASE_URL}/rentals/overdue/`,{headers:{"Content-Type":"application/json",Authorization:`Bearer ${token}`}});
     if(!response.ok)throw new Error(`API 오류: ${response.status}`);
-    return await response.json();
-  }catch(error){console.error("현재 연체 도서 정보 불러오기 실패:",error);return [];}
+    const data=await response.json();
+    return Array.isArray(data)?data:data?.results??[];
+  }catch(error){console.error("현재 연체 도서 정보 불러오기 실패:",error);throw error;}
 };
 
 function LoadingRows(){
@@ -38,8 +39,7 @@ export default function CurrentOverdue(){
   useEffect(()=>{
     const getRentals=async()=>{
       try{
-        const data=await fetchCurrentRentals();
-        const overdue=data.filter((item)=>item.is_overdue);
+        const overdue=await fetchOverdueRentals();
         setRentals(overdue);
         localStorage.setItem("overdueCount",overdue.length.toString());
       }catch(err){setError(err.message);}finally{setLoading(false);}
