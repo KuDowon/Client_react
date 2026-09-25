@@ -5,6 +5,7 @@ import Footer from "../Components/Footer";
 import AppHeader from "../Components/layout/AppHeader";
 import AppShell from "../Components/layout/AppShell";
 import PageContainer from "../Components/layout/PageContainer";
+import Tabs, { TabPanel } from "../Components/ui/Tabs";
 
 import info1 from "../Images/info1.png";
 import info2 from "../Images/info2.png";
@@ -89,15 +90,25 @@ export default function GuidePage(){
             <p>서비스 이용 방법과 운영 정보를 확인할 수 있어요.</p>
           </div>
 
-          <div className="guide-tabs" role="tablist" aria-label="이용안내 메뉴">
-            {[
-              ["use","이용안내"],["sitemap","사이트맵"],["infouse","이용약관·개인정보"],["make","만든 사람들"]
-            ].map(([key,label])=>(
-              <button key={key} type="button" role="tab" aria-selected={activeTab===key} className={activeTab===key?"active":""} onClick={()=>setActiveTab(key)}>{label}</button>
-            ))}
-          </div>
+          <Tabs
+            idPrefix="guide"
+            className="guide-tabs"
+            ariaLabel="이용안내 메뉴"
+            value={activeTab}
+            onChange={setActiveTab}
+            tabs={[
+              {value:"use",label:"이용안내"},
+              {value:"sitemap",label:"사이트맵"},
+              {value:"infouse",label:"이용약관·개인정보"},
+              {value:"make",label:"만든 사람들"}
+            ]}
+          />
 
-          <div className="guide-page__content">{contentMap[activeTab]}</div>
+          {Object.entries(contentMap).map(([key,content])=>(
+            <TabPanel key={key} idPrefix="guide" tabValue={key} activeValue={activeTab} className="guide-page__content">
+              {content}
+            </TabPanel>
+          ))}
         </section>
       </PageContainer>
       <Footer/>
