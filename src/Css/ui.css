@@ -20,7 +20,8 @@
 .ui-icon-button--outline{border-color:var(--color-border-subtle);background:var(--color-surface-default)}
 .ui-icon-button--selected{color:var(--color-favorite-fg);background:var(--color-favorite-bg);border-color:var(--color-favorite-border)}
 .ui-icon-button--selected:hover:not(:disabled){color:var(--color-favorite-fg);background:var(--color-yellow-100);border-color:var(--color-yellow-400)}
-.ui-icon-button--selected .ui-icon{fill:var(--color-favorite-fill)}
+.ui-icon__heart-filled{fill:currentColor;stroke:none}
+.ui-icon-button--selected .ui-icon__heart-filled{fill:var(--color-favorite-fill);stroke:var(--color-favorite-fg);stroke-width:1.4}
 .ui-icon{width:20px;height:20px;display:block;flex:0 0 auto}
 .ui-field{display:flex;flex-direction:column;gap:var(--space-2);width:100%}
 .ui-field__label{font-size:15px;line-height:23px;font-weight:600;color:var(--color-text-primary)}
