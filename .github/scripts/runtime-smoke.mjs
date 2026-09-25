@@ -461,9 +461,13 @@ try {
       const bottomInner = document.querySelector(".app-bottom-nav__inner");
       const topNav = document.querySelector(".app-top-nav");
       const topItems = [...document.querySelectorAll(".app-top-nav__item")];
+      const headerInner = document.querySelector(".app-header__inner");
+      const accountButton = document.querySelector(".app-header__desktop-cluster .app-header__account .ui-button");
       const navRect = bottomNav?.getBoundingClientRect();
       const innerRect = bottomInner?.getBoundingClientRect();
       const topRect = topNav?.getBoundingClientRect();
+      const headerRect = headerInner?.getBoundingClientRect();
+      const accountRect = accountButton?.getBoundingClientRect();
       return {
         innerWidth: window.innerWidth,
         innerHeight: window.innerHeight,
@@ -477,6 +481,12 @@ try {
         staleDesktopNavCount: document.querySelectorAll(".app-header__desktop-nav").length,
         topNavDisplay: topNav ? getComputedStyle(topNav).display : null,
         topNavHeight: topRect?.height ?? null,
+        topNavTop: topRect?.top ?? null,
+        topNavRight: topRect?.right ?? null,
+        headerInnerHeight: headerRect?.height ?? null,
+        headerInnerTop: headerRect?.top ?? null,
+        accountLeft: accountRect?.left ?? null,
+        accountLabel: accountButton?.textContent?.trim() || null,
         topItemWidths: topItems.map((item) => item.getBoundingClientRect().width),
       };
     });
@@ -521,11 +531,23 @@ try {
       if (!metrics.topNavDisplay || metrics.topNavDisplay === "none") {
         failures.push(`${testCase.name}: top navigation is not visible`);
       }
-      if (metrics.topNavHeight !== 48) {
-        failures.push(`${testCase.name}: top navigation height expected 48px but got ${metrics.topNavHeight}`);
+      if (metrics.headerInnerHeight !== 64 || metrics.topNavHeight !== 64) {
+        failures.push(`${testCase.name}: desktop header and GNB must share one 64px row (${metrics.headerInnerHeight} / ${metrics.topNavHeight})`);
       }
-      if (metrics.topItemWidths.length !== 3 || metrics.topItemWidths.some((width) => Math.abs(width - 112) > 1)) {
-        failures.push(`${testCase.name}: top navigation link widths are not consistently 112px`);
+      if (metrics.topNavTop !== null && metrics.headerInnerTop !== null && Math.abs(metrics.topNavTop - metrics.headerInnerTop) > 1) {
+        failures.push(`${testCase.name}: GNB is not aligned in the same header row`);
+      }
+      if (metrics.topItemWidths.length !== 3 || metrics.topItemWidths.some((width) => width < 44)) {
+        failures.push(`${testCase.name}: desktop navigation items do not preserve accessible hit targets`);
+      }
+      if (metrics.topItemWidths.length === 3 && metrics.topItemWidths[1] <= metrics.topItemWidths[0]) {
+        failures.push(`${testCase.name}: desktop GNB still behaves like equal-width tabs instead of content-width navigation`);
+      }
+      if (metrics.topNavRight !== null && metrics.accountLeft !== null && metrics.topNavRight > metrics.accountLeft + 1) {
+        failures.push(`${testCase.name}: GNB must sit to the left of the account action`);
+      }
+      if (!["로그인", "로그아웃"].includes(metrics.accountLabel)) {
+        failures.push(`${testCase.name}: desktop account action is missing`);
       }
       if (metrics.scrollWidth > metrics.innerWidth + 1) {
         failures.push(`${testCase.name}: top-navigation mode creates horizontal overflow`);
