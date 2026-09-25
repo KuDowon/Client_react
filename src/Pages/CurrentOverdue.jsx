@@ -50,7 +50,7 @@ function LoadingRows(){
 
 export default function CurrentOverdue(){
   const {state}=useLocation();
-  const backTo=state?.from==="/MyPage"?"/MyPage":"/";
+  const backTo=state?.from||"/";
   const [rentals,setRentals]=useState([]);
   const [loading,setLoading]=useState(true);
   const [error,setError]=useState(null);
