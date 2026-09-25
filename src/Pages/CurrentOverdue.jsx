@@ -7,6 +7,7 @@ import AppHeader from "../Components/layout/AppHeader";
 import AppShell from "../Components/layout/AppShell";
 import PageContainer from "../Components/layout/PageContainer";
 import BookListItem from "../Components/library/BookListItem";
+import Button from "../Components/ui/Button";
 import Dialog from "../Components/ui/Dialog";
 import EmptyState from "../Components/ui/EmptyState";
 import SectionHeader from "../Components/ui/SectionHeader";
@@ -101,7 +102,7 @@ export default function CurrentOverdue(){
             <p className="status-page__description">연체 도서는 가능한 빨리 반납해주세요.</p>
           </div>
           {loading?<LoadingRows/>:null}
-          {error?<EmptyState icon="alert" title="연체 정보를 불러오지 못했어요." description={error}/>:null}
+          {error?<EmptyState icon="alert" title="연체 정보를 불러오지 못했어요." description={error} action={<Button variant="secondary" onClick={loadRentals}>다시 시도</Button>}/>:null}
           {!loading&&!error&&rentals.length===0?<EmptyState icon="check" title="연체 중인 도서가 없어요." description="현재 반납이 필요한 연체 도서가 없습니다."/>:null}
           {!loading&&!error&&rentals.length>0?(
             <div className="status-page__list">
