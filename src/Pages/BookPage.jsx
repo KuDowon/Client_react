@@ -102,8 +102,8 @@ function statusPresentation(status) {
   const normalized = String(status).toUpperCase();
   if (normalized === "AVAILABLE") return { label: "대출 가능", tone: "success" };
   if (normalized === "RENTED") return { label: "대출 중", tone: "neutral" };
-  if (normalized === "RESERVED") return { label: "예약 중", tone: "neutral" };
-  if (normalized === "UNAVAILABLE") return { label: "대출 불가", tone: "neutral" };
+  if (normalized === "RESERVED") return { label: "예약 중", tone: "warning" };
+  if (normalized === "UNAVAILABLE") return { label: "대출 불가", tone: "danger" };
   return { label: String(status), tone: "neutral" };
 }
 
