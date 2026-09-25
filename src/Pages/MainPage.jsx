@@ -8,7 +8,6 @@ import AppShell from "../Components/layout/AppShell";
 import AppHeader from "../Components/layout/AppHeader";
 import PageContainer from "../Components/layout/PageContainer";
 import LibraryStatusSummary from "../Components/library/LibraryStatusSummary";
-import Button from "../Components/ui/Button";
 import Icon from "../Components/ui/Icon";
 import SectionHeader from "../Components/ui/SectionHeader";
 
@@ -100,39 +99,16 @@ function MainPage() {
     }
   }, [user]);
 
-  const handleAuthClick = () => {
-    if (!user) {
-      navigate("/LoginPage");
-      return;
-    }
+  useEffect(() => {
+    const syncAuthState = () => setUser(getLoggedInUser());
+    window.addEventListener("mungo-auth-change", syncAuthState);
+    return () => window.removeEventListener("mungo-auth-change", syncAuthState);
+  }, []);
 
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
-    localStorage.removeItem("userID");
-    localStorage.removeItem("username");
-    localStorage.removeItem("borrowCount");
-    localStorage.removeItem("reserveCount");
-    localStorage.removeItem("overdueCount");
-
-    setUser(null);
-    setBorrowCount(null);
-    setOverdueCount(null);
-    setReserveCount(null);
-    navigate("/");
-  };
 
   return (
     <AppShell>
-      <AppHeader
-        main
-        title="문중문고"
-        right={
-          <Button variant="tertiary" size="sm" onClick={handleAuthClick}>
-            {user ? "로그아웃" : "로그인"}
-          </Button>
-        }
-      />
+      <AppHeader main title="문중문고" />
 
       <PageContainer>
         <div className="main-v2 layout-stack">
