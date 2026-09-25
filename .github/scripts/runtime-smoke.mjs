@@ -7,41 +7,41 @@ const cases = [
   { name: "home-390", path: "/", viewport: { width: 390, height: 844 }, expectedText: "필요한 책을 쉽고 빠르게 찾아보세요.", navigation: "bottom", expectedLockedSummary: true },
   { name: "home-768", path: "/", viewport: { width: 768, height: 1024 }, expectedText: "필요한 책을 쉽고 빠르게 찾아보세요.", navigation: "bottom" },
   { name: "home-820", path: "/", viewport: { width: 820, height: 1180 }, expectedText: "필요한 책을 쉽고 빠르게 찾아보세요.", navigation: "bottom" },
-  { name: "home-1024", path: "/", viewport: { width: 1024, height: 768 }, expectedText: "필요한 책을 쉽고 빠르게 찾아보세요.", navigation: "bottom" },
-  { name: "home-1200", path: "/", viewport: { width: 1200, height: 900 }, expectedText: "필요한 책을 쉽고 빠르게 찾아보세요.", navigation: "bottom" },
-  { name: "home-1366", path: "/", viewport: { width: 1366, height: 768 }, expectedText: "필요한 책을 쉽고 빠르게 찾아보세요.", navigation: "bottom" },
-  { name: "home-1440", path: "/", viewport: { width: 1440, height: 900 }, expectedText: "필요한 책을 쉽고 빠르게 찾아보세요.", navigation: "bottom" },
+  { name: "home-1024", path: "/", viewport: { width: 1024, height: 768 }, expectedText: "필요한 책을 쉽고 빠르게 찾아보세요.", navigation: "top" },
+  { name: "home-1200", path: "/", viewport: { width: 1200, height: 900 }, expectedText: "필요한 책을 쉽고 빠르게 찾아보세요.", navigation: "top" },
+  { name: "home-1366", path: "/", viewport: { width: 1366, height: 768 }, expectedText: "필요한 책을 쉽고 빠르게 찾아보세요.", navigation: "top" },
+  { name: "home-1440", path: "/", viewport: { width: 1440, height: 900 }, expectedText: "필요한 책을 쉽고 빠르게 찾아보세요.", navigation: "top" },
   { name: "home-topmode-820", path: "/?navMode=top", viewport: { width: 820, height: 1180 }, expectedText: "필요한 책을 쉽고 빠르게 찾아보세요.", navigation: "bottom" },
   { name: "home-topmode-1024", path: "/?navMode=top", viewport: { width: 1024, height: 768 }, expectedText: "필요한 책을 쉽고 빠르게 찾아보세요.", navigation: "top" },
   { name: "home-topmode-1440", path: "/?navMode=top", viewport: { width: 1440, height: 900 }, expectedText: "필요한 책을 쉽고 빠르게 찾아보세요.", navigation: "top" },
   { name: "home-bottommode-1024", path: "/?navMode=bottom", viewport: { width: 1024, height: 768 }, expectedText: "필요한 책을 쉽고 빠르게 찾아보세요.", navigation: "bottom" },
 
   { name: "search-filter-390", path: "/search", viewport: { width: 390, height: 844 }, expectedText: "검색어를 입력해주세요.", navigation: "bottom", filter: true },
-  { name: "search-filter-1024", path: "/search", viewport: { width: 1024, height: 768 }, expectedText: "검색어를 입력해주세요.", navigation: "bottom", filter: true },
+  { name: "search-filter-1024", path: "/search", viewport: { width: 1024, height: 768 }, expectedText: "검색어를 입력해주세요.", navigation: "top", filter: true },
   { name: "search-data-390", path: "/search?query=qa", viewport: { width: 390, height: 844 }, expectedText: LONG_BOOK_TITLE, navigation: "bottom", filter: true, mockSearch: true },
-  { name: "search-data-1024", path: "/search?query=qa", viewport: { width: 1024, height: 768 }, expectedText: LONG_BOOK_TITLE, navigation: "bottom", filter: true, mockSearch: true },
+  { name: "search-data-1024", path: "/search?query=qa", viewport: { width: 1024, height: 768 }, expectedText: LONG_BOOK_TITLE, navigation: "top", filter: true, mockSearch: true },
   { name: "search-data-topmode-1024", path: "/search?query=qa&navMode=top", viewport: { width: 1024, height: 768 }, expectedText: LONG_BOOK_TITLE, navigation: "top", filter: true, mockSearch: true },
 
   { name: "book-data-390", path: "/BookPage/1", viewport: { width: 390, height: 844 }, expectedText: LONG_BOOK_TITLE, navigation: "bottom", mockBook: true },
   { name: "book-code-data-390", path: "/BookPage/MJ123456", viewport: { width: 390, height: 844 }, expectedText: LONG_BOOK_TITLE, navigation: "bottom", mockBook: true, mockBookCode: true },
   { name: "book-data-820", path: "/BookPage/1", viewport: { width: 820, height: 1180 }, expectedText: LONG_BOOK_TITLE, navigation: "bottom", mockBook: true },
-  { name: "book-data-1024", path: "/BookPage/1", viewport: { width: 1024, height: 768 }, expectedText: LONG_BOOK_TITLE, navigation: "bottom", mockBook: true },
-  { name: "book-reserved-1024", path: "/BookPage/1", viewport: { width: 1024, height: 768 }, expectedText: LONG_BOOK_TITLE, navigation: "bottom", mockBook: true, bookStatus: "RESERVED", expectedBookAction: "예약중", expectedBookActionDisabled: true },
+  { name: "book-data-1024", path: "/BookPage/1", viewport: { width: 1024, height: 768 }, expectedText: LONG_BOOK_TITLE, navigation: "top", mockBook: true },
+  { name: "book-reserved-1024", path: "/BookPage/1", viewport: { width: 1024, height: 768 }, expectedText: LONG_BOOK_TITLE, navigation: "top", mockBook: true, bookStatus: "RESERVED", expectedBookAction: "예약 중", expectedBookActionDisabled: true },
   { name: "book-favorite-390", path: "/BookPage/1", viewport: { width: 390, height: 844 }, expectedText: LONG_BOOK_TITLE, navigation: "bottom", mockBook: true, seedAuth: true, favoriteToggle: true },
 
   { name: "my-data-390", path: "/MyPage", viewport: { width: 390, height: 844 }, expectedText: "테스트 사용자", navigation: "bottom", mockMyPage: true, expectedWithdrawal: true },
   { name: "my-data-820", path: "/MyPage", viewport: { width: 820, height: 1180 }, expectedText: "테스트 사용자", navigation: "bottom", mockMyPage: true, expectedWithdrawal: true },
-  { name: "my-data-1024", path: "/MyPage", viewport: { width: 1024, height: 768 }, expectedText: "테스트 사용자", navigation: "bottom", mockMyPage: true, expectedWithdrawal: true },
+  { name: "my-data-1024", path: "/MyPage", viewport: { width: 1024, height: 768 }, expectedText: "테스트 사용자", navigation: "top", mockMyPage: true, expectedWithdrawal: true },
 
-  { name: "loan-choice-1024", path: "/LoanChoice", viewport: { width: 1024, height: 768 }, expectedText: "무엇을 하시겠어요?", navigation: "bottom" },
+  { name: "loan-choice-1024", path: "/LoanChoice", viewport: { width: 1024, height: 768 }, expectedText: "무엇을 하시겠어요?", navigation: "top" },
   { name: "borrow-empty-820", path: "/CurrentBorrow", viewport: { width: 820, height: 1180 }, expectedText: "대출 중인 도서가 없어요.", navigation: "bottom" },
-  { name: "reserve-empty-1024", path: "/CurrentReserve", viewport: { width: 1024, height: 768 }, expectedText: "현재 예약 중인 도서가 없어요.", navigation: "bottom" },
-  { name: "overdue-empty-1366", path: "/CurrentOverdue", viewport: { width: 1366, height: 768 }, expectedText: "연체 중인 도서가 없어요.", navigation: "bottom" },
+  { name: "reserve-empty-1024", path: "/CurrentReserve", viewport: { width: 1024, height: 768 }, expectedText: "현재 예약 중인 도서가 없어요.", navigation: "top" },
+  { name: "overdue-empty-1366", path: "/CurrentOverdue", viewport: { width: 1366, height: 768 }, expectedText: "연체 중인 도서가 없어요.", navigation: "top" },
   { name: "overdue-data-820", path: "/CurrentOverdue", viewport: { width: 820, height: 1180 }, expectedText: "5일 연체", navigation: "bottom", mockOverdue: true, seedAuth: true, expectedOverdueEndpoint: true },
   { name: "overdue-from-home-820", path: "/CurrentOverdue", viewport: { width: 820, height: 1180 }, expectedText: "연체 중인 도서가 없어요.", navigation: "bottom", entryFrom: "/", expectedBackTo: "/", expectedActiveNav: "홈" },
   { name: "overdue-from-my-820", path: "/CurrentOverdue", viewport: { width: 820, height: 1180 }, expectedText: "연체 중인 도서가 없어요.", navigation: "bottom", entryFrom: "/MyPage", expectedBackTo: "/MyPage", expectedActiveNav: "마이" },
-  { name: "guide-1440", path: "/GuidePage", viewport: { width: 1440, height: 900 }, expectedText: "문중문고 이용안내", navigation: "bottom" },
-  { name: "curation-1024", path: "/CurationPage", viewport: { width: 1024, height: 768 }, expectedText: "수업과 관심사에 맞는 도서를 둘러보세요.", navigation: "bottom" },
+  { name: "guide-1440", path: "/GuidePage", viewport: { width: 1440, height: 900 }, expectedText: "문중문고 이용안내", navigation: "top" },
+  { name: "curation-1024", path: "/CurationPage", viewport: { width: 1024, height: 768 }, expectedText: "수업과 관심사에 맞는 도서를 둘러보세요.", navigation: "top" },
 
   { name: "login-390", path: "/LoginPage", viewport: { width: 390, height: 844 }, expectedText: "문중문고의 대출·예약 서비스를 이용하려면 로그인해주세요." },
   { name: "signup-390", path: "/SignUp", viewport: { width: 390, height: 844 }, expectedText: "문중문고 이용을 위한 기본 정보를 입력해주세요." },
@@ -357,12 +357,23 @@ try {
           optionLabels: [...document.querySelectorAll(".ui-filter-select__option")].map((node) => node.textContent.trim()),
           selected: document.querySelector('.ui-filter-select__option[aria-selected="true"]')?.textContent.trim() || null,
         }));
-        if (!filterState.optionLabels.some((label) => label.includes("제목순")) ||
+        if (!filterState.optionLabels.some((label) => label.includes("관련도순")) ||
+            !filterState.optionLabels.some((label) => label.includes("제목순")) ||
             !filterState.optionLabels.some((label) => label.includes("인기순"))) {
           failures.push(`${testCase.name}: filter choices are incomplete`);
         }
-        if (!filterState.selected?.includes("제목순")) {
-          failures.push(`${testCase.name}: selected filter choice is not clearly represented`);
+        if (!filterState.selected?.includes("관련도순")) {
+          failures.push(`${testCase.name}: default related-sort choice is not clearly represented`);
+        }
+
+        const chips = await page.evaluate(() => [...document.querySelectorAll(".ui-filter-chip")].map((node) => ({
+          text: node.textContent.trim(),
+          pressed: node.getAttribute("aria-pressed")
+        })));
+        const allChip = chips.find((chip) => chip.text === "전체");
+        const availableChip = chips.find((chip) => chip.text === "대출 가능");
+        if (!allChip || allChip.pressed !== "true" || !availableChip) {
+          failures.push(`${testCase.name}: availability filter chips are missing or initial selection is incorrect`);
         }
       } catch (error) {
         failures.push(`${testCase.name}: filter interaction failed: ${error.message}`);
@@ -376,8 +387,8 @@ try {
         const button = item?.querySelector(".ui-button");
         return button ? { text: button.textContent.trim(), disabled: button.disabled } : null;
       });
-      if (!reservedState || reservedState.text !== "예약중" || !reservedState.disabled) {
-        failures.push(`${testCase.name}: RESERVED search result must show a disabled 예약중 action`);
+      if (!reservedState || reservedState.text !== "예약 중" || !reservedState.disabled) {
+        failures.push(`${testCase.name}: RESERVED search result must show a disabled 예약 중 action`);
       }
     }
 
