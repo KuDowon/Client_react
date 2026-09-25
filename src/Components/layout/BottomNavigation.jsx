@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import Icon from "../ui/Icon";
 import { getPrimaryNavActive, useNavigationMode } from "./navigationMode";
 
-export default function BottomNavigation({ onLoanReturn }) {
+export default function BottomNavigation({ onLoanReturn, onMy }) {
   const { pathname, state } = useLocation();
   const navigationMode = useNavigationMode();
 
@@ -23,10 +23,10 @@ export default function BottomNavigation({ onLoanReturn }) {
           <Icon name="loan-return" size={24} />
           <span>대출·반납</span>
         </button>
-        <Link to="/MyPage" {...itemProps("my")}>
+        <button type="button" onClick={onMy} {...itemProps("my")}>
           <Icon name="user" size={24} />
           <span>마이</span>
-        </Link>
+        </button>
       </div>
     </nav>
   );
