@@ -7,6 +7,7 @@ import AppHeader from "../Components/layout/AppHeader";
 import AppShell from "../Components/layout/AppShell";
 import PageContainer from "../Components/layout/PageContainer";
 import BookListItem from "../Components/library/BookListItem";
+import Button from "../Components/ui/Button";
 import Dialog from "../Components/ui/Dialog";
 import EmptyState from "../Components/ui/EmptyState";
 import SectionHeader from "../Components/ui/SectionHeader";
@@ -54,6 +55,7 @@ export default function CurrentReserve(){
   const [error,setError]=useState(null);
   const [modalMessage,setModalMessage]=useState(null);
   const [confirmModalState,setConfirmModalState]=useState({isOpen:false,reservationId:null});
+  const [canceling,setCanceling]=useState(false);
 
   const refreshReservationData=useCallback(async()=>{
     setLoading(true);setError(null);
@@ -62,20 +64,27 @@ export default function CurrentReserve(){
       setReservations(data);
       const activeCount=data.filter((item)=>item.status==="ACTIVE").length;
       localStorage.setItem("reserveCount",activeCount.toString());
-    }catch(err){setError(err.message);}finally{setLoading(false);}
+    }catch(err){console.error("현재 예약 도서 정보 불러오기 실패:",err);setError("예약 정보를 불러오지 못했어요. 잠시 후 다시 시도해주세요.");}finally{setLoading(false);}
   },[]);
 
   useEffect(()=>{refreshReservationData();},[refreshReservationData]);
 
   const executeCancellation=async()=>{
     const reservationId=confirmModalState.reservationId;
-    setConfirmModalState({isOpen:false,reservationId:null});
-    if(!reservationId)return;
+    if(!reservationId||canceling)return;
+    setCanceling(true);
     try{
       const message=await cancelReservationAPI(reservationId);
+      setConfirmModalState({isOpen:false,reservationId:null});
       setModalMessage(message||"예약이 취소되었습니다.");
-      refreshReservationData();
-    }catch(err){setModalMessage(err.message||"예약 취소 중 알 수 없는 오류가 발생했습니다.");}
+      await refreshReservationData();
+    }catch(err){
+      console.error("예약 취소 실패:",err);
+      setConfirmModalState({isOpen:false,reservationId:null});
+      setModalMessage("예약 취소를 완료하지 못했어요. 잠시 후 다시 시도해주세요.");
+    }finally{
+      setCanceling(false);
+    }
   };
 
   return (
@@ -88,7 +97,7 @@ export default function CurrentReserve(){
             <p className="status-page__description">예약 상태와 관련 일정을 확인할 수 있어요.</p>
           </div>
           {loading?<LoadingRows/>:null}
-          {error?<EmptyState icon="alert" title="예약 정보를 불러오지 못했어요." description={error}/>:null}
+          {error?<EmptyState icon="alert" title="예약 정보를 불러오지 못했어요." description={error} action={<Button variant="secondary" onClick={refreshReservationData}>다시 시도</Button>}/>:null}
           {!loading&&!error&&reservations.length===0?<EmptyState icon="clock" title="현재 예약 중인 도서가 없어요." description="대출 중인 도서를 예약하면 이곳에서 확인할 수 있어요."/>:null}
           {!loading&&!error&&reservations.length>0?(
             <div className="status-page__list">
@@ -104,7 +113,7 @@ export default function CurrentReserve(){
         </section>
       </PageContainer>
       <Footer/>
-      <Dialog open={confirmModalState.isOpen} title="예약을 취소할까요?" confirmLabel="예약 취소" cancelLabel="유지하기" destructive onConfirm={executeCancellation} onClose={()=>setConfirmModalState({isOpen:false,reservationId:null})}>취소한 예약은 다시 신청해야 해요.</Dialog>
+      <Dialog open={confirmModalState.isOpen} title="예약을 취소할까요?" confirmLabel="예약 취소" cancelLabel="유지하기" destructive confirmLoading={canceling} onConfirm={executeCancellation} onClose={()=>{if(!canceling)setConfirmModalState({isOpen:false,reservationId:null});}}>취소한 예약은 다시 신청해야 해요.</Dialog>
       <Dialog open={Boolean(modalMessage)} title="예약 처리 결과" confirmLabel="확인" hideCancel onConfirm={()=>setModalMessage(null)} onClose={()=>setModalMessage(null)}>{modalMessage}</Dialog>
     </AppShell>
   );
