@@ -30,7 +30,7 @@ export default function Dialog({
     const onKeyDown = (event) => {
       if (event.key === "Escape") {
         event.preventDefault();
-        onClose?.();
+        if (!confirmLoading) onClose?.();
         return;
       }
 
@@ -68,7 +68,7 @@ export default function Dialog({
         previousActive.focus();
       }
     };
-  }, [open, hideCancel, onClose]);
+  }, [open, hideCancel, onClose, confirmLoading]);
 
   if (!open) return null;
 
@@ -76,7 +76,7 @@ export default function Dialog({
     <div
       className="ui-dialog-backdrop"
       onMouseDown={(event) => {
-        if (event.target === event.currentTarget) onClose?.();
+        if (event.target === event.currentTarget && !confirmLoading) onClose?.();
       }}
     >
       <section
@@ -92,7 +92,7 @@ export default function Dialog({
         </div>
         <div className="ui-dialog__actions">
           {!hideCancel ? (
-            <Button ref={cancelRef} variant="secondary" onClick={onClose}>
+            <Button ref={cancelRef} variant="secondary" onClick={onClose} disabled={confirmLoading}>
               {cancelLabel}
             </Button>
           ) : null}
