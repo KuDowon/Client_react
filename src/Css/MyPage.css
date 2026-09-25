@@ -38,3 +38,10 @@
 .mypage-v2__danger-link{color:var(--color-action-danger-text)!important}
 .mypage-v2__danger-link:hover{background:var(--color-action-danger-hover)!important;color:var(--color-action-danger-text-hover)!important}
 .mypage-v2__helper{font-size:12px;line-height:18px;color:var(--color-text-tertiary)}
+
+.interest-page{padding:32px 0 48px;max-width:800px;display:flex;flex-direction:column;gap:20px}
+.interest-page__intro{display:flex;flex-direction:column;gap:4px}
+.interest-page__intro h1{font-size:20px;line-height:30px;font-weight:700;letter-spacing:-.01em}
+.interest-page__intro p{font-size:14px;line-height:21px;color:var(--color-text-secondary)}
+.interest-page__list,.interest-page__loading{display:flex;flex-direction:column}
+@media (min-width:768px){.interest-page{padding-top:40px;padding-bottom:64px}}
