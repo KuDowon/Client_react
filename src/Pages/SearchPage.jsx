@@ -104,9 +104,9 @@ function getStatusInfo(status) {
     case "RENTED":
       return { label: "대출 중", tone: "neutral", actionLabel: "예약하기", disabled: false };
     case "RESERVED":
-      return { label: "예약 중", tone: "neutral", actionLabel: "예약 중", disabled: true };
+      return { label: "예약 중", tone: "warning", actionLabel: "예약 중", disabled: true };
     case "UNAVAILABLE":
-      return { label: "대출 불가", tone: "neutral", actionLabel: "대출 불가", disabled: true };
+      return { label: "대출 불가", tone: "danger", actionLabel: "대출 불가", disabled: true };
     default:
       return { label: "상태 확인 필요", tone: "neutral", actionLabel: "이용 불가", disabled: true };
   }
