@@ -64,8 +64,11 @@
 .app-header{width:100%;border-bottom:1px solid var(--color-border-subtle);background:var(--color-surface-default)}
 .app-header__inner{width:100%;max-width:1200px;height:56px;margin:0 auto;padding:0 var(--layout-gutter);display:grid;grid-template-columns:44px minmax(0,1fr) 44px;align-items:center;gap:8px}
 .app-header--main .app-header__inner{grid-template-columns:minmax(0,1fr) auto}
+.app-header__leading{min-width:0;display:contents}
 .app-header__title{font-size:18px;line-height:27px;font-weight:700;letter-spacing:-.005em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .app-header__right{display:flex;align-items:center;justify-content:flex-end;min-width:44px}
+.app-header__account{display:flex;align-items:center}
+.app-header__account--mobile{margin:0;padding:0;border:0}
 
 .app-bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:1000;min-height:calc(76px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);background:var(--color-surface-default);border-top:1px solid var(--color-border-subtle);box-shadow:var(--shadow-sticky)}
 .app-bottom-nav__inner{width:min(100%,520px);height:76px;margin:0 auto;display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
@@ -74,16 +77,22 @@
 .app-bottom-nav__item[aria-current="page"]{color:var(--color-navigation-active)}
 .app-bottom-nav__item[aria-current="page"]::before{content:"";position:absolute;top:0;left:50%;width:24px;height:2px;border-radius:0 0 2px 2px;background:var(--color-navigation-active);transform:translateX(-50%)}
 
-.app-top-nav{display:none;width:100%;height:48px;background:var(--color-surface-default);box-shadow:inset 0 1px 0 var(--color-border-subtle)}
-.app-top-nav__inner{width:100%;max-width:1200px;height:48px;margin:0 auto;padding:0 var(--layout-gutter);display:flex;align-items:stretch}
-.app-top-nav__menu{display:grid;grid-template-columns:repeat(3,112px);height:48px}
-.app-top-nav__item{position:relative;min-width:112px;height:48px;padding:0 16px;border:0;border-bottom:2px solid transparent;background:transparent;display:flex;align-items:center;justify-content:center;text-decoration:none;color:var(--color-text-secondary);font-size:14px;line-height:21px;font-weight:600;white-space:nowrap}
+.app-top-nav{display:flex;align-items:stretch;height:64px}
+.app-top-nav__item{position:relative;min-width:44px;height:64px;padding:0 16px;border:0;border-bottom:2px solid transparent;background:transparent;display:flex;align-items:center;justify-content:center;text-decoration:none;color:var(--color-text-secondary);font-size:14px;line-height:21px;font-weight:600;white-space:nowrap}
 .app-top-nav__item:hover{background:var(--color-gray-50);color:var(--color-text-primary)}
 .app-top-nav__item[aria-current="page"]{color:var(--color-blue-700);border-bottom-color:var(--color-blue-600)}
 .app-top-nav__item:focus-visible{outline:2px solid var(--color-border-focus);outline-offset:-2px}
+
 @media (min-width:960px){
-  .app-shell--top-mode .app-top-nav{display:block}
   .app-shell--top-mode .app-bottom-nav{display:none}
+  .app-header--top-mode .app-header__inner{height:64px;display:flex;align-items:center;gap:24px}
+  .app-header--top-mode .app-header__leading{display:flex;align-items:center;gap:8px;min-width:0;flex:0 1 auto}
+  .app-header--top-mode.app-header--main .app-header__leading{gap:0}
+  .app-header--top-mode .app-header__title{flex:0 1 auto}
+  .app-header__desktop-cluster{height:64px;margin-left:auto;display:flex;align-items:center;justify-content:flex-end;min-width:0}
+  .app-header__desktop-extra{display:flex;align-items:center;margin-left:8px}
+  .app-header__desktop-cluster>.app-header__account{height:32px;margin-left:12px;padding-left:16px;border-left:1px solid var(--color-border-subtle)}
+  .app-header__desktop-cluster>.app-header__account .ui-button{white-space:nowrap}
 }
 
 
