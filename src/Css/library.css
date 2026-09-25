@@ -23,6 +23,7 @@
 .book-list-item__title-link:hover .book-list-item__title{color:var(--color-blue-700)}
 .book-list-item__author{font-size:14px;line-height:21px;color:var(--color-text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .book-list-item__metadata{font-size:13px;line-height:20px;color:var(--color-text-tertiary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.book-list-item__metadata--emphasis{font-size:14px;line-height:21px;font-weight:600;color:var(--color-text-primary)}
 .book-list-item__submeta{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:4px;font-size:12px;line-height:18px;color:var(--color-text-tertiary)}
 .book-list-item__actions{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
 @media (max-width:479px){.book-list-item{grid-template-columns:72px minmax(0,1fr);gap:12px}.book-list-item__cover-link,.book-list-item__cover{width:72px}.book-list-item__actions{grid-column:2;flex-direction:row-reverse;justify-content:flex-end;align-items:center}.book-list-item__actions .ui-button{min-width:92px}}
