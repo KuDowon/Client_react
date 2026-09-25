@@ -589,7 +589,7 @@ export default function BookPage() {
           <Toast
             tone={toast.tone}
             actionLabel={toast.actionLabel}
-            onAction={toast.actionTo ? () => navigate(toast.actionTo, { state: { from: "/BookPage" } }) : undefined}
+            onAction={toast.actionTo ? () => navigate(toast.actionTo, { state: { from: location.pathname + location.search } }) : undefined}
             onClose={() => setToast(null)}
           >
             {toast.message}
