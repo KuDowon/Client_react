@@ -45,7 +45,12 @@ function LoanForm({onSubmit,buttonText,caption}){
         helperText="예: MJ123456"
       />
       <Button type="submit" variant="primary" size="lg" block>{buttonText}</Button>
-      {caption?<div className="loan-v2-form__caption">{caption}</div>:null}
+      {caption?(
+        <aside className="loan-v2-form__caption" aria-label="대출 및 반납 이용 안내">
+          <strong className="loan-v2-form__caption-title">이용 전 확인해주세요</strong>
+          <div className="loan-v2-form__caption-list">{caption}</div>
+        </aside>
+      ):null}
     </form>
   );
 }
