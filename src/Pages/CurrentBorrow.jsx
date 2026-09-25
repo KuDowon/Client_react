@@ -18,14 +18,9 @@ const API_BASE_URL=process.env.REACT_APP_API_BASE_URL;
 const fetchCurrentRentals=async()=>{
   const token=localStorage.getItem("accessToken");
   if(!token)return [];
-  try{
-    const response=await fetch(`${API_BASE_URL}/rentals/current/`,{headers:{"Content-Type":"application/json",Authorization:`Bearer ${token}`}});
-    if(!response.ok)throw new Error(`API 오류: ${response.status}`);
-    return await response.json();
-  }catch(error){
-    console.error("현재 대출 도서 정보 불러오기 실패:",error);
-    return [];
-  }
+  const response=await fetch(`${API_BASE_URL}/rentals/current/`,{headers:{"Content-Type":"application/json",Authorization:`Bearer ${token}`}});
+  if(!response.ok)throw new Error(`API 오류: ${response.status}`);
+  return await response.json();
 };
 
 const returnBookAPI=async(rentalId)=>{
@@ -98,7 +93,7 @@ export default function CurrentBorrow(){
                 const bookCode=item.book?.book_code||item.id;
                 const reservationMessage=item.book?.book_status==="RESERVED"?"다음 예약자가 있어 빠른 반납이 필요해요.":null;
                 const book={id:item.book?.id||item.id,title:item.book?.title||item.book?.book_title||`도서 ${bookCode}`,author:item.book?.author||"",publisher:item.book?.publisher||"",code:bookCode,location:item.book?.location||""};
-                const meta=[`대출일: ${item.rental_date||"-"}`,`반납 예정일: ${item.due_date||"-"}`,reservationMessage].filter(Boolean);
+                const meta=[{text:`대출일: ${item.rental_date||"-"}`},{text:`반납 예정일: ${item.due_date||"-"}`,emphasis:true},reservationMessage].filter(Boolean);
                 return <BookListItem key={item.id} book={book} cover={item.book?.image_url||printnull} detailTo={`/BookPage/${bookCode}`} statusLabel="대출중" statusTone="neutral" meta={meta} actionLabel="반납하기" onAction={()=>setConfirmModalState({isOpen:true,rentalId:item.id})}/>;
               })}
             </div>
