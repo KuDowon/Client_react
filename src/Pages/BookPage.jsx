@@ -14,6 +14,7 @@ import IconButton from "../Components/ui/IconButton";
 import SectionHeader from "../Components/ui/SectionHeader";
 import Skeleton from "../Components/ui/Skeleton";
 import StatusBadge from "../Components/ui/StatusBadge";
+import Toast from "../Components/ui/Toast";
 import printnull from "../Images/printnull.png";
 
 const BASE = "https://mungo.n-e.kr";
@@ -93,6 +94,8 @@ const FALLBACK_BOOK = {
 const toText = (value) =>
   Array.isArray(value) ? value.filter(Boolean).join(" ; ") : value ?? "-";
 
+const isLoggedIn = () => Boolean(localStorage.getItem("accessToken"));
+
 function statusPresentation(status) {
   if (!status) return null;
   const normalized = String(status).toUpperCase();
@@ -101,6 +104,15 @@ function statusPresentation(status) {
   if (normalized === "RESERVED") return { label: "예약중", tone: "neutral" };
   if (normalized === "UNAVAILABLE") return { label: "대출불가", tone: "neutral" };
   return { label: String(status), tone: "neutral" };
+}
+
+function primaryActionPresentation(status) {
+  const normalized = String(status || "").toUpperCase();
+  if (normalized === "AVAILABLE") return { label: "대출하기", kind: "rent", disabled: false };
+  if (normalized === "RENTED") return { label: "예약하기", kind: "reserve", disabled: false };
+  if (normalized === "RESERVED") return { label: "예약중", kind: null, disabled: true };
+  if (normalized === "UNAVAILABLE") return { label: "대출불가", kind: null, disabled: true };
+  return { label: "상태 확인", kind: null, disabled: true };
 }
 
 export default function BookPage() {
@@ -116,11 +128,19 @@ export default function BookPage() {
   const [modalMsg, setModalMsg] = useState("");
   const [isReviewBoxOpen, setIsReviewBoxOpen] = useState(false);
   const [newReviewText, setNewReviewText] = useState("");
+  const [loginPromptOpen, setLoginPromptOpen] = useState(false);
+  const [toast, setToast] = useState(null);
 
   const openModal = (message) => {
     setModalMsg(message);
     setIsModalOpen(true);
   };
+
+  useEffect(() => {
+    if (!toast) return undefined;
+    const timer = window.setTimeout(() => setToast(null), 2400);
+    return () => window.clearTimeout(timer);
+  }, [toast]);
 
   useEffect(() => {
     const ac = new AbortController();
@@ -183,7 +203,7 @@ export default function BookPage() {
           publisher: toText(detail?.publisher),
           format: toText(detail?.physical ?? detail?.format),
           callNumber: toText(detail?.call_number ?? detail?.callNumber ?? detail?.callnumber),
-          status: detail?.status ?? null,
+          status: detail?.book_status ?? detail?.status ?? null,
           series: toText(detail?.series),
           details: toText(detail?.details),
           notes: toText(detail?.notes),
@@ -192,7 +212,8 @@ export default function BookPage() {
           MJcode: toText(detail?.book_code),
         });
 
-        if (typeof detail?.liked === "boolean") setIsLiked(detail.liked);
+        const liked = detail?.is_liked ?? detail?.liked;
+        if (typeof liked === "boolean") setIsLiked(liked);
       } catch (error) {
         if (error.name !== "AbortError") {
           console.error("[BOOK DETAIL] fail:", error);
@@ -227,14 +248,24 @@ export default function BookPage() {
 
   const handleLikeToggle = async () => {
     if (invalidId) return;
+    if (!isLoggedIn()) {
+      setLoginPromptOpen(true);
+      return;
+    }
+
     const previous = isLiked;
-    setIsLiked(!previous);
+    const nextLiked = !previous;
+    setIsLiked(nextLiked);
     try {
-      await fetchJSON(`/books/${pk}/like/`, { method: "POST", auth: true, body: {} });
+      await fetchJSON(`/books/${pk}/like/`, { method: "POST", auth: true });
+      setToast({
+        tone: "success",
+        message: nextLiked ? "관심도서에 저장했어요." : "관심도서에서 삭제했어요."
+      });
     } catch (error) {
       console.error("[LIKE] fail:", error);
       setIsLiked(previous);
-      openModal("좋아요 처리 중 오류가 발생했습니다.");
+      setToast({ tone: "danger", message: "관심도서 저장에 실패했어요. 잠시 후 다시 시도해주세요." });
     }
   };
 
@@ -269,6 +300,7 @@ export default function BookPage() {
         })
       );
       setReviews(normalized);
+      setToast({ tone: "success", message: "리뷰를 등록했어요." });
     } catch (error) {
       console.error("[REVIEW CREATE] fail:", error);
       setReviews((previous) => previous.filter((review) => review.id !== optimistic.id));
@@ -278,6 +310,10 @@ export default function BookPage() {
 
   const handleRent = async () => {
     if (invalidId) return;
+    if (!isLoggedIn()) {
+      setLoginPromptOpen(true);
+      return;
+    }
 
     try {
       const bookCode = bookData?.code || bookData?.book_code || bookData?.bookCode;
@@ -291,6 +327,7 @@ export default function BookPage() {
         auth: true,
         body: { code: bookCode },
       });
+      setBookData((previous) => ({ ...previous, status: "RENTED" }));
       openModal("✅ 대출이 완료되었습니다.");
     } catch (error) {
       console.error("[RENT] fail:", error);
@@ -302,11 +339,17 @@ export default function BookPage() {
 
   const handleReserve = async () => {
     if (invalidId) return;
+    if (!isLoggedIn()) {
+      setLoginPromptOpen(true);
+      return;
+    }
+    if (String(bookData.status || "").toUpperCase() === "RESERVED") return;
     try {
       await fetchJSON(`/books/${pk}/reserve/`, {
         method: "POST",
         auth: true,
       });
+      setBookData((previous) => ({ ...previous, status: "RESERVED" }));
       openModal("예약이 완료되었습니다.");
     } catch (error) {
       console.error("[RESERVE] fail:", error);
@@ -315,6 +358,7 @@ export default function BookPage() {
   };
 
   const status = statusPresentation(bookData.status);
+  const primaryAction = primaryActionPresentation(bookData.status);
   const modalIsError = modalMsg.trim().startsWith("❌") || /실패|오류/.test(modalMsg);
   const displayModalMessage = modalMsg.replace(/^[✅❌]\s*/, "");
 
@@ -370,15 +414,25 @@ export default function BookPage() {
                   </dl>
 
                   <div className="book-detail__actions">
-                    <Button variant="primary" size="lg" onClick={handleRent}>대출하기</Button>
-                    <Button variant="secondary" size="lg" onClick={handleReserve}>예약하기</Button>
+                    <Button
+                      variant="primary"
+                      size="lg"
+                      disabled={primaryAction.disabled}
+                      onClick={primaryAction.kind === "rent" ? handleRent : primaryAction.kind === "reserve" ? handleReserve : undefined}
+                    >
+                      {primaryAction.label}
+                    </Button>
                     <IconButton
                       icon={isLiked ? "heart-filled" : "heart"}
                       label={isLiked ? "관심도서 취소" : "관심도서 설정"}
                       variant="outline"
+                      selected={isLiked}
                       onClick={handleLikeToggle}
                     />
                   </div>
+                  {String(bookData.status || "").toUpperCase() === "RESERVED" ? (
+                    <p className="book-detail__action-helper">현재 다른 이용자가 예약한 도서라 추가 예약할 수 없어요.</p>
+                  ) : null}
                 </div>
               </section>
 
@@ -397,7 +451,17 @@ export default function BookPage() {
                 <SectionHeader
                   title={`리뷰 ${reviews.length}`}
                   action={
-                    <Button variant="tertiary" size="sm" onClick={() => setIsReviewBoxOpen((open) => !open)}>
+                    <Button
+                      variant="tertiary"
+                      size="sm"
+                      onClick={() => {
+                        if (!isLoggedIn()) {
+                          setLoginPromptOpen(true);
+                          return;
+                        }
+                        setIsReviewBoxOpen((open) => !open);
+                      }}
+                    >
                       <Icon name={isReviewBoxOpen ? "close" : "edit"} size={16} />
                       {isReviewBoxOpen ? "닫기" : "작성"}
                     </Button>
@@ -462,6 +526,26 @@ export default function BookPage() {
       >
         {displayModalMessage || "처리가 완료되었습니다."}
       </Dialog>
+
+      <Dialog
+        open={loginPromptOpen}
+        title="로그인이 필요한 서비스예요"
+        confirmLabel="로그인"
+        cancelLabel="닫기"
+        onConfirm={() => {
+          setLoginPromptOpen(false);
+          navigate("/LoginPage");
+        }}
+        onClose={() => setLoginPromptOpen(false)}
+      >
+        대출·예약·관심도서·리뷰 기능을 이용하려면 먼저 로그인해주세요.
+      </Dialog>
+
+      {toast ? (
+        <div className="ui-toast-stack" aria-live="polite">
+          <Toast tone={toast.tone}>{toast.message}</Toast>
+        </div>
+      ) : null}
     </AppShell>
   );
 }
