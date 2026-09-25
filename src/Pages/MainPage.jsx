@@ -164,9 +164,10 @@ function MainPage() {
             />
             <div id="library-status-title" className="sr-only">나의 이용 현황</div>
             <LibraryStatusSummary
-              borrowCount={user ? borrowCount : 0}
-              reserveCount={user ? reserveCount : 0}
-              overdueCount={user ? overdueCount : 0}
+              borrowCount={borrowCount}
+              reserveCount={reserveCount}
+              overdueCount={overdueCount}
+              locked={!user}
             />
             {!user ? (
               <p className="main-v2__helper">
