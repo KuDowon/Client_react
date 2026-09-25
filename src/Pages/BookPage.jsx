@@ -142,7 +142,7 @@ export default function BookPage() {
 
   useEffect(() => {
     if (!toast) return undefined;
-    const timer = window.setTimeout(() => setToast(null), 2400);
+    const timer = window.setTimeout(() => setToast(null), toast.actionLabel ? 5000 : 3000);
     return () => window.clearTimeout(timer);
   }, [toast]);
 
