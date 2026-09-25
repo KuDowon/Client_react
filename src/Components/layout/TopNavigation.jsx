@@ -16,6 +16,7 @@ export default function TopNavigation() {
       navigate("/LoanChoice");
       return;
     }
+
     navigate("/LoginPage", {
       state: {
         returnTo: "/LoanChoice",
@@ -26,13 +27,9 @@ export default function TopNavigation() {
 
   return (
     <nav className="app-top-nav" aria-label="주요 메뉴">
-      <div className="app-top-nav__inner">
-        <div className="app-top-nav__menu">
-          <Link to="/" {...itemProps("home")}>홈</Link>
-          <button type="button" onClick={handleLoanReturn} {...itemProps("loan")}>대출·반납</button>
-          <Link to="/MyPage" {...itemProps("my")}>마이</Link>
-        </div>
-      </div>
+      <Link to="/" {...itemProps("home")}>홈</Link>
+      <button type="button" onClick={handleLoanReturn} {...itemProps("loan")}>대출·반납</button>
+      <Link to="/MyPage" {...itemProps("my")}>마이</Link>
     </nav>
   );
 }
