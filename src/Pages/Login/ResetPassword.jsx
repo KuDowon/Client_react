@@ -1,44 +1,32 @@
-import React,{useState} from "react";
+import React from "react";
 import "../../Css/loginstyle.css";
 
 import AuthLayout from "../../Components/layout/AuthLayout";
-import Button from "../../Components/ui/Button";
-import Dialog from "../../Components/ui/Dialog";
-import TextField from "../../Components/ui/TextField";
+
+const KAKAO_SUPPORT_URL="http://pf.kakao.com/_pHxbDn";
 
 export default function ResetPassword(){
-  const [name,setName]=useState("");
-  const [userId,setUserId]=useState("");
-  const [phone,setPhone]=useState("");
-  const [error,setError]=useState("");
-  const [noticeOpen,setNoticeOpen]=useState(false);
-
-  const handleFindPassword=(event)=>{
-    event.preventDefault();
-    if(!name.trim()||!userId.trim()||!phone.trim()){
-      setError("이름, 아이디, 전화번호를 모두 입력해주세요.");
-      return;
-    }
-    setError("");
-    setNoticeOpen(true);
-  };
-
   return (
-    <>
-      <AuthLayout title="비밀번호 찾기" description="현재 비밀번호 변경 기능은 관리자 확인을 통해 진행돼요." backTo="/LoginPage">
-        <form className="auth-form" onSubmit={handleFindPassword} noValidate>
-          <TextField label="이름" value={name} onChange={(event)=>{setName(event.target.value);if(error)setError("");}}/>
-          <TextField label="아이디" value={userId} onChange={(event)=>{setUserId(event.target.value);if(error)setError("");}}/>
-          <TextField label="전화번호" value={phone} onChange={(event)=>{setPhone(event.target.value.replace(/\D/g,"").slice(0,11));if(error)setError("");}} inputMode="numeric"/>
-          {error?<p className="auth-form__error" role="alert">{error}</p>:null}
-          <Button type="submit" size="lg" block>확인하기</Button>
-        </form>
-        <p className="auth-support">비밀번호 변경 API가 현재 화면에 연결되어 있지 않아 자동 변경은 진행하지 않아요.</p>
-      </AuthLayout>
-
-      <Dialog open={noticeOpen} title="관리자 문의가 필요해요." confirmLabel="확인" hideCancel onConfirm={()=>setNoticeOpen(false)} onClose={()=>setNoticeOpen(false)}>
-        입력 정보는 서버로 전송되지 않았어요. 비밀번호 변경은 문중문고 관리자에게 문의해주세요.
-      </Dialog>
-    </>
+    <AuthLayout
+      title="비밀번호 찾기"
+      description="비밀번호 변경은 관리자 확인 후 진행하고 있어요."
+      backTo="/LoginPage"
+    >
+      <div className="auth-inquiry">
+        <div className="auth-inquiry__copy">
+          <strong>비밀번호를 잊으셨나요?</strong>
+          <p>문중문고 카카오톡으로 문의해주시면 본인 확인 후 비밀번호 변경을 도와드려요.</p>
+        </div>
+        <a
+          className="ui-button ui-button--primary ui-button--lg ui-button--block auth-inquiry__cta"
+          href={KAKAO_SUPPORT_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          카카오톡으로 문의하기
+        </a>
+        <p className="auth-support">이 화면에서는 이름, 아이디, 전화번호를 별도로 입력받거나 서버로 전송하지 않아요.</p>
+      </div>
+    </AuthLayout>
   );
 }
