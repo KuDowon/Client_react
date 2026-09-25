@@ -153,7 +153,7 @@ export default function SearchPage() {
 
   useEffect(() => {
     if (!toast) return undefined;
-    const timer = window.setTimeout(() => setToast(null), 2400);
+    const timer = window.setTimeout(() => setToast(null), toast.actionLabel ? 5000 : 3000);
     return () => window.clearTimeout(timer);
   }, [toast]);
 
@@ -404,11 +404,20 @@ export default function SearchPage() {
             ) : null}
 
             {!loading && !err && visibleBooks.length === 0 ? (
-              <EmptyState
-                icon="search"
-                title={q ? "검색 결과가 없어요." : "검색어를 입력해주세요."}
-                description={q ? "다른 제목이나 저자명으로 다시 검색해보세요." : "도서명 또는 저자명을 검색할 수 있어요."}
-              />
+              filterMode === "available" && books.length > 0 ? (
+                <EmptyState
+                  icon="book"
+                  title="대출 가능한 도서가 없어요."
+                  description="전체 검색 결과에서는 다른 이용 상태의 도서도 확인할 수 있어요."
+                  action={<Button variant="secondary" onClick={() => setFilterMode("all")}>전체 결과 보기</Button>}
+                />
+              ) : (
+                <EmptyState
+                  icon="search"
+                  title={q ? "검색 결과가 없어요." : "검색어를 입력해주세요."}
+                  description={q ? "다른 제목이나 저자명으로 다시 검색해보세요." : "도서명 또는 저자명을 검색할 수 있어요."}
+                />
+              )
             ) : null}
 
             {!loading && !err && visibleBooks.length > 0 ? (
