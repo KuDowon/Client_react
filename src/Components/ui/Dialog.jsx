@@ -10,7 +10,9 @@ export default function Dialog({
   onConfirm,
   onClose,
   destructive = false,
-  hideCancel = false
+  hideCancel = false,
+  confirmLoading = false,
+  confirmDisabled = false
 }) {
   const titleId = useId();
   const dialogRef = useRef(null);
@@ -98,6 +100,8 @@ export default function Dialog({
             ref={confirmRef}
             variant={destructive ? "danger" : "primary"}
             onClick={onConfirm || onClose}
+            loading={confirmLoading}
+            disabled={confirmDisabled}
           >
             {confirmLabel}
           </Button>
