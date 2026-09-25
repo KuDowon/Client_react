@@ -421,14 +421,16 @@ try {
         await page.waitForSelector(".review-page__editor textarea", { visible: true, timeout: 3000 });
         await page.evaluate(() => {
           const textarea = document.querySelector(".review-page__editor textarea");
-          textarea.value = "서버에 저장되는 수정 리뷰";
+          const setter = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, "value")?.set;
+          setter?.call(textarea, "서버에 저장되는 수정 리뷰");
           textarea.dispatchEvent(new Event("input", { bubbles: true }));
         });
         await page.click(".ui-dialog__actions .ui-button--primary");
         await page.waitForFunction(() => document.body.innerText.includes("리뷰를 수정했어요."), { timeout: 3000 });
         const patchUsed = observedRequests.some((entry) => entry.method === "PATCH" && entry.url.endsWith("/reviews/44/"));
         const updatedText = await page.evaluate(() => document.body.innerText.includes("서버에 저장되는 수정 리뷰"));
-        if (!patchUsed || !updatedText) failures.push(`${testCase.name}: review PATCH did not persist in UI`);
+        if (!patchUsed) failures.push(`${testCase.name}: PATCH /reviews/44/ was not called`);
+        if (!updatedText) failures.push(`${testCase.name}: updated review content was not rendered after PATCH success`);
       } catch (error) {
         failures.push(`${testCase.name}: review edit interaction failed: ${error.message}`);
       }
