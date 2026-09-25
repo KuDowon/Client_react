@@ -5,8 +5,8 @@ export const WIDE_NAV_BREAKPOINT = 960;
 
 export function getPrimaryNavActive(pathname, state, key) {
   if (pathname.startsWith("/Current")) {
-    if (state?.from === "/") return key === "home";
-    return key === "my";
+    if (state?.from?.startsWith("/MyPage")) return key === "my";
+    return key === "home";
   }
 
   if (key === "home") return pathname === "/";
