@@ -4,7 +4,7 @@ import puppeteer from "puppeteer";
 const LONG_BOOK_TITLE = "반응형 테스트를 위한 아주 긴 도서 제목이 두 줄 이상이어도 레이아웃이 무너지지 않아야 합니다";
 
 const cases = [
-  { name: "home-390", path: "/", viewport: { width: 390, height: 844 }, expectedText: "필요한 책을 쉽고 빠르게 찾아보세요.", navigation: "bottom" },
+  { name: "home-390", path: "/", viewport: { width: 390, height: 844 }, expectedText: "필요한 책을 쉽고 빠르게 찾아보세요.", navigation: "bottom", expectedLockedSummary: true },
   { name: "home-768", path: "/", viewport: { width: 768, height: 1024 }, expectedText: "필요한 책을 쉽고 빠르게 찾아보세요.", navigation: "bottom" },
   { name: "home-820", path: "/", viewport: { width: 820, height: 1180 }, expectedText: "필요한 책을 쉽고 빠르게 찾아보세요.", navigation: "bottom" },
   { name: "home-1024", path: "/", viewport: { width: 1024, height: 768 }, expectedText: "필요한 책을 쉽고 빠르게 찾아보세요.", navigation: "bottom" },
@@ -23,6 +23,7 @@ const cases = [
   { name: "search-data-topmode-1024", path: "/search?query=qa&navMode=top", viewport: { width: 1024, height: 768 }, expectedText: LONG_BOOK_TITLE, navigation: "top", filter: true, mockSearch: true },
 
   { name: "book-data-390", path: "/BookPage/1", viewport: { width: 390, height: 844 }, expectedText: LONG_BOOK_TITLE, navigation: "bottom", mockBook: true },
+  { name: "book-code-data-390", path: "/BookPage/MJ123456", viewport: { width: 390, height: 844 }, expectedText: LONG_BOOK_TITLE, navigation: "bottom", mockBook: true, mockBookCode: true },
   { name: "book-data-820", path: "/BookPage/1", viewport: { width: 820, height: 1180 }, expectedText: LONG_BOOK_TITLE, navigation: "bottom", mockBook: true },
   { name: "book-data-1024", path: "/BookPage/1", viewport: { width: 1024, height: 768 }, expectedText: LONG_BOOK_TITLE, navigation: "bottom", mockBook: true },
   { name: "book-reserved-1024", path: "/BookPage/1", viewport: { width: 1024, height: 768 }, expectedText: LONG_BOOK_TITLE, navigation: "bottom", mockBook: true, bookStatus: "RESERVED", expectedBookAction: "예약중", expectedBookActionDisabled: true },
@@ -221,6 +222,17 @@ try {
           return;
         }
 
+        if (testCase.mockBookCode && url.includes("/books/") && url.includes("search=MJ123456")) {
+          await jsonResponse(request, [{
+            id: 1,
+            book_code: "MJ123456",
+            title: LONG_BOOK_TITLE,
+            book_status: "AVAILABLE",
+            is_liked: false
+          }]);
+          return;
+        }
+
         if (testCase.mockBook && url.endsWith("/books/1/")) {
           await jsonResponse(request, {
             ...mockBookDetail,
@@ -324,6 +336,16 @@ try {
       });
       if (!withdrawal || !withdrawal.href.includes("pf.kakao.com")) {
         failures.push(`${testCase.name}: withdrawal inquiry entry is missing or points to the wrong channel`);
+      }
+    }
+
+    if (testCase.expectedLockedSummary) {
+      const locked = await page.evaluate(() => ({
+        count: document.querySelectorAll(".library-summary__item--locked").length,
+        hasZeroCount: [...document.querySelectorAll(".library-summary__value")].some((node) => node.textContent.includes("0권"))
+      }));
+      if (locked.count !== 3 || locked.hasZeroCount) {
+        failures.push(`${testCase.name}: logged-out summary should show three locked dash states instead of zero counts`);
       }
     }
 
