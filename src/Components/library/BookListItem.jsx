@@ -34,7 +34,17 @@ export default function BookListItem({
         </Link>
         {book.author ? <p className="book-list-item__author">{book.author}</p> : null}
         {book.publisher ? <p className="book-list-item__metadata">{book.publisher}</p> : null}
-        {meta.map((line,index)=><p className="book-list-item__metadata" key={`${line}-${index}`}>{line}</p>)}
+        {meta.map((line,index)=>{
+          const item=typeof line==="string"?{text:line}:line;
+          return (
+            <p
+              className={["book-list-item__metadata",item?.emphasis?"book-list-item__metadata--emphasis":""].filter(Boolean).join(" ")}
+              key={`${item?.text || index}-${index}`}
+            >
+              {item?.text}
+            </p>
+          );
+        })}
         <div className="book-list-item__submeta">
           {book.code ? <span>{book.code}</span> : null}
           {book.location ? <span>{book.location}</span> : null}
