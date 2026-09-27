@@ -1,12 +1,17 @@
-import { Routes, Route, Link } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
+import './Css/tokens.css';
 import './Css/font.css';
-import './Css/toolkit.css';
+import './Css/base.css';
+import './Css/layout.css';
+import './Css/ui.css';
+import './Css/library.css';
 
 /* MainPage */
 import MainPage from './Pages/MainPage.jsx';
 import NoticePage from './Pages/NoticePage.jsx';
 import CurationPage from './Pages/CurationPage.jsx';
 import GuidePage from './Pages/GuidePage.jsx';
+import NotFoundPage from './Pages/NotFoundPage.jsx';
 /*Current*/
 import CurrentBorrow from './Pages/CurrentBorrow.jsx';
 import CurrentOverdue from './Pages/CurrentOverdue.jsx';
@@ -25,6 +30,7 @@ import BookPage from './Pages/BookPage.jsx';
 /* MyPage */
 import MyPage from './Pages/MyPage/MyPage.jsx';
 import MyReviewsPage from './Pages/MyPage/MyReviewsPage.jsx';
+import Interest from './Pages/MyPage/Interest.jsx';
 import EditProfilePage from './Pages/MyPage/EditProfilePage.jsx';
 
 /* Loan */
@@ -42,18 +48,7 @@ function App() {
         <Route path="/CurrentBorrow" element={<CurrentBorrow />} />
         <Route path="/CurrentOverdue" element={<CurrentOverdue />} />
         <Route path="/CurrentReserve" element={<CurrentReserve/>} />
-        <Route
-          path="/current_reserve"
-          element={
-            <>
-              <div className="top-bar">
-                <Link to="/" className="back-btn" aria-label="뒤로가기">←</Link>
-                <span className="top-tittle">현재 예약 중인 도서</span>
-              </div>
-              
-            </>
-          }
-        />
+        <Route path="/current_reserve" element={<Navigate to="/CurrentReserve" replace />} />
 
         {/* 일반 페이지 */}
         <Route path="/NoticePage" element={<NoticePage />} />
@@ -76,11 +71,15 @@ function App() {
         <Route path="/MyPage" element={<MyPage />} />
         <Route path="/EditProfilePage" element={<EditProfilePage />} />
         <Route path="/MyReviewsPage" element={<MyReviewsPage />} />
+        <Route path="/Interest" element={<Interest />} />
 
         {/* 대출/반납 */}
         <Route path="/LoanChoice" element={<LoanChoice />} />
         <Route path="/LoanLoan" element={<LoanLoan />} />
         <Route path="/LoanReturn" element={<LoanReturn />} />
+
+        {/* 잘못된 주소 */}
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </div>
   );

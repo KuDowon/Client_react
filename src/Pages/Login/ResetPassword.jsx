@@ -1,93 +1,32 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React from "react";
+import "../../Css/loginstyle.css";
 
-import '../../Css/loginstyle.css';
-import logoImage from '../../Images/navigation2.png';
+import AuthLayout from "../../Components/layout/AuthLayout";
 
-function ResetPassword() {
-  // 폼 입력 값을 관리하기 위한 state
-  const [name, setName] = useState('');
-  const [userId, setUserId] = useState('');
-  const [contactMethod] = useState('phone'); // 'phone' 또는 'email'
-  const [phone, setPhone] = useState('');
-  const [email, setEmail] = useState('');
+const KAKAO_SUPPORT_URL="http://pf.kakao.com/_pHxbDn";
 
-  // 비밀번호 찾기 form 제출 시 실행될 함수
-  const handleFindPassword = (event) => {
-    event.preventDefault(); // form의 기본 새로고침 동작 방지
-
-    // state 값으로 유효성 검사 수행
-    if (!name || !userId) {
-      alert("이름과 아이디를 입력해주세요.");
-      return;
-    }
-    if (contactMethod === "phone" && !phone) {
-      alert("전화번호를 입력해주세요.");
-      return;
-    }
-    if (contactMethod === "email" && !email) {
-      alert("이메일을 입력해주세요.");
-      return;
-    }
-
-    alert("비밀번호 변경 절차를 시작합니다.");
-    // 여기에 실제 서버와 통신하는 로직을 추가합니다.
-  };
-
+export default function ResetPassword(){
   return (
-    <div className="login-container">
-      <div className="blue-top-bar">
-          <a href="LoginPage" className="back-btn" aria-label="뒤로가기">
-            ←
-          </a>
+    <AuthLayout
+      title="비밀번호 찾기"
+      description="비밀번호 변경은 관리자 확인 후 진행하고 있어요."
+      backTo="/LoginPage"
+    >
+      <div className="auth-inquiry">
+        <div className="auth-inquiry__copy">
+          <strong>비밀번호를 잊으셨나요?</strong>
+          <p>문중문고 카카오톡으로 문의해주시면 본인 확인 후 비밀번호 변경을 도와드려요.</p>
         </div>
-      <Link to="/">
-          <img src={logoImage} alt="로고" className="logo" />
-        </Link>
-      <h2>비밀번호 찾기</h2>
-      <form onSubmit={handleFindPassword}>
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="이름"
-          required
-        />
-        <input
-          type="text"
-          value={userId}
-          onChange={(e) => setUserId(e.target.value)}
-          placeholder="아이디"
-          required
-        />
-
-      
-
-        {/* 조건부 렌더링: 선택된 방법에 따라 다른 입력창을 보여줌 */}
-        {contactMethod === 'phone' ? (
-          <div className="contact-input">
-            <input
-              type="tel"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="전화번호"
-            />
-          </div>
-        ) : (
-          <div className="contact-input">
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="이메일"
-            />
-          </div>
-        )}
-
-        <button type="submit">비밀번호 찾기 및 변경</button>
-      </form>
-    </div>
+        <a
+          className="ui-button ui-button--primary ui-button--lg ui-button--block auth-inquiry__cta"
+          href={KAKAO_SUPPORT_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          카카오톡으로 문의하기
+        </a>
+        <p className="auth-support">이 화면에서는 이름, 아이디, 전화번호를 별도로 입력받거나 서버로 전송하지 않아요.</p>
+      </div>
+    </AuthLayout>
   );
 }
-
-export default ResetPassword;

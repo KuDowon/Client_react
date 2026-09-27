@@ -1,103 +1,70 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import {submitLoanRequest} from '../../Api/loan.js';
-import '../../Css/Loan.css';
-import logoImage from '../../Images/navigation2.png';
-import LoanForm from '../../Components/LoanForm';
+import React,{useState} from "react";
+import {useNavigate} from "react-router-dom";
+import {submitLoanRequest} from "../../Api/loan.js";
+import "../../Css/Loan.css";
 
+import Footer from "../../Components/Footer";
+import LoanForm from "../../Components/LoanForm";
+import AppHeader from "../../Components/layout/AppHeader";
+import AppShell from "../../Components/layout/AppShell";
+import PageContainer from "../../Components/layout/PageContainer";
+import Dialog from "../../Components/ui/Dialog";
 
-const CustomModal = ({ isOpen, message, onClose, onConfirm }) => {
-    if (!isOpen) return null;
-    const isSuccess = message.startsWith('✅'); 
-    // 성공 시 반납일 계산 (오늘 날짜 + 7일)
-    const getReturnDate = () => {
-        const today = new Date();
-        today.setDate(today.getDate() + 7);
-        return today.toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' });
-    };
-  const displayMessage = isSuccess
-        ? (
-            <>
-                <p style={{ fontWeight: 'bold' }}>대출되었습니다.</p>
-                <p style={{ marginTop: '10px' }}>반납일: {getReturnDate()}</p>
-            </>
-        )
-        : <p>{message.replace('❌', '')}</p>; // 에러 메시지에서 ❌ 기호 제거
+export default function LoanLoan(){
+  const [isModalOpen,setIsModalOpen]=useState(false);
+  const [modalMessage,setModalMessage]=useState("");
+  const [resultKind,setResultKind]=useState("success");
+  const navigate=useNavigate();
 
-    return (
-        <div className={`loan-modal ${isOpen ? 'open' : ''}`} id="loan-modal">
-            <div className="modal-content">
-                {displayMessage}
-                <div className="popup-buttons">
-                    {isSuccess ? (
-                        <>
-                            <button className="popup-btn" onClick={onClose}>더 대출하기</button>
-                            <button className="popup-btn primary" onClick={onConfirm}>메인페이지 가기</button>
-                        </>
-                    ) : (
-                        <button className="popup-btn" onClick={onClose}>확인</button>
-                    )}
-                </div>
-            </div>
-            <div className="modal-overlay" onClick={onClose}></div>
-        </div>
-    );
-};
-
-
-function LoanLoan() {
-  const [isModalOpen, setIsModalOpen] = useState(false); 
-  const [modalMessage, setModalMessage] = useState('');
-  const navigate = useNavigate();
-  const openModal = (msg) => {
-    setModalMessage(msg);
+  const openModal=(message,kind)=>{
+    setModalMessage(message);
+    setResultKind(kind);
     setIsModalOpen(true);
   };
 
-
-  // "대출"에 특화된 제출 로직 (백엔드 요청 포함)
-    const handleLoanSubmit = async (bookId) => {
-    try {
+  const handleLoanSubmit=async(bookId)=>{
+    try{
       await submitLoanRequest(bookId);
-
-        openModal('대출되었습니다');
-    } catch (err) {
-        openModal(err.message); 
-        console.error('[LoanLoan] Error caught in UI:', err.message);
+      openModal("대출이 완료되었습니다.","success");
+    }catch(error){
+      openModal(error.message?.replace(/^❌\s*/,"")||"대출 처리 중 오류가 발생했습니다.","error");
+      console.error("[LoanLoan] Error caught in UI:",error.message);
     }
   };
 
-  const loanCaption = (
+  const caption=(
     <>
-      ※ 대출기간은 7일이며, 대출 연장은 1회에 한해 7일까지 가능합니다(최종 14일).<br />
-      ※ 대출 예약을 한 경우, 대기 제한이 없을 시 3일 내 대출해야 합니다.<br />
-      ※ 연속 대출은 예약자가 있는 경우에는 불가능하며, 없는 경우에도 3일이 지나야 가능합니다.<br />
-      ※ 연체 시 연체일 만큼 대출이 금지됩니다.
+      <p>대출 기간과 연장 가능 여부는 도서관 운영 정책을 따릅니다.</p>
+      <p>예약자가 있는 도서는 연속 대출이 제한될 수 있어요.</p>
+      <p>연체 시 연체 기간에 따라 대출이 제한될 수 있어요.</p>
     </>
   );
 
   return (
-    <div className="loan-container">
-      <div className="top-bar">
-        <div className="back-btn" onClick={() => navigate('/LoanChoice')}>←</div>
-        <h1 className="sun-title">대출</h1>
-      </div>
-      <Link to="/"><img src={logoImage} alt="로고" className="logo" /></Link>
+    <AppShell>
+      <AppHeader title="대출하기" backTo="/LoanChoice"/>
+      <PageContainer>
+        <section className="loan-action">
+          <div className="loan-action__intro">
+            <h1>도서 등록번호를 입력해주세요.</h1>
+            <p>책에 표시된 MJ로 시작하는 등록번호를 확인해주세요.</p>
+          </div>
+          <LoanForm onSubmit={handleLoanSubmit} buttonText="대출하기" caption={caption}/>
+        </section>
+      </PageContainer>
+      <Footer/>
 
-      <LoanForm 
-        onSubmit={handleLoanSubmit} 
-        buttonText="대출하기"
-        caption={loanCaption}
-      />
-      
-       <CustomModal
-        isOpen={isModalOpen}
-        message={modalMessage}
-        onClose={() => {setIsModalOpen(false);}}
-        onConfirm={() => navigate('/')} // 확인 버튼: 마이페이지로 이동
-        />
-        </div>
+      <Dialog
+        open={isModalOpen}
+        title={resultKind==="success"?"대출이 완료됐어요.":"대출을 처리하지 못했어요."}
+        confirmLabel={resultKind==="success"?"메인으로":"확인"}
+        cancelLabel={resultKind==="success"?"더 대출하기":"닫기"}
+        hideCancel={resultKind!=="success"}
+        onClose={()=>setIsModalOpen(false)}
+        onConfirm={()=>resultKind==="success"?navigate("/"):setIsModalOpen(false)}
+      >
+        {modalMessage}
+      </Dialog>
+    </AppShell>
   );
 }
-
-export default LoanLoan;

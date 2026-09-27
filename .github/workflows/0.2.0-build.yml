@@ -1,0 +1,57 @@
+name: 0.2.0 Build Check
+
+on:
+  push:
+    branches:
+      - 0.2.0
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Build
+        env:
+          DISABLE_ESLINT_PLUGIN: "true"
+        run: npm run build
+
+      - name: Component smoke tests
+        env:
+          CI: "true"
+        run: npm test -- --watchAll=false
+
+      - name: Install runtime QA tools
+        run: npm install --no-save --no-audit --no-fund serve puppeteer
+
+      - name: Responsive browser smoke
+        run: |
+          npx serve -s build -l 4173 > /tmp/munjung-serve.log 2>&1 &
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:4173/ > /dev/null; then
+              break
+            fi
+            sleep 1
+          done
+          curl -fsS http://127.0.0.1:4173/ > /dev/null || { cat /tmp/munjung-serve.log; exit 1; }
+          node .github/scripts/runtime-smoke.mjs
+
+      - name: Upload responsive smoke screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: 0.2.0-responsive-smoke
+          path: smoke-artifacts
+          if-no-files-found: warn
+          retention-days: 7
